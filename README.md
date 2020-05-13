@@ -1,1 +1,5 @@
 # EasyDocker
+
+Windowsの初心者ユーザーにもDockerでソフトウエアを動かしてもらうためのGUIです。
+
+Dokcerコンテナを起動するときに cmd プロンプトから
