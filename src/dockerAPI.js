@@ -143,7 +143,14 @@ exports.exportContainer = exportContainer = function (x_id, x_filepath) {
 //--------------------------------------
 // images
 //--------------------------------------
-exports.getImages = getImages = function () {
+/**
+ * @param x_callback(data) 処理完了時の戻り値伝達用関数
+ * data = [{id, size, tag}]
+ * 
+ */
+exports.getImages = getImages = function (x_callback) {
+  var retImages = []
+
   options = getOptions("/images/json?all=true", "GET", "")
   http = require('http');
   let req = http.request(options, (res) => {
@@ -153,19 +160,32 @@ exports.getImages = getImages = function () {
       images.forEach(function (image) {
         console.log("------------ container ------------")
         //console.log(container)
-        console.log("ID=" + image['Id'])
-        console.log("Size=" + image['Size'])
-
+        id = image['Id']
+        size = image['Size']
+        console.log("ID=" + id + ", Size=" + size)
+       
+        tag = ""
         image['RepoTags'].forEach(function (repotag) {
-          console.log(repotag);
+          if(tag != ""){
+            tag += ","
+          }
+          tag += repotag
         })
+        retImages.push({'id':id, 'size':size, 'tag': tag});
       })
     });
+    // getImages完了時にreturnする
+    res.on('end', () => {
+      x_callback(retImages);
+    })
+    return retImages;
   });
   req.on('error', (e) => {
     console.log('problem with request: ' + e.message);
   });
-  req.end();
+  req.end() // 送信
+
+  //return new Promise(function(resolve, reject){})
 }
 
 exports.importImage = importImage = function(x_imgFile){

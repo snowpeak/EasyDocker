@@ -1,0 +1,22 @@
+{
+  "name": "easydocker",
+  "version": "1.0.0",
+  "description": "Docker GUI for beginners",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/snowpeak/EasyDocker.git"
+  },
+  "author": "snowpeak",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/snowpeak/EasyDocker/issues"
+  },
+  "homepage": "https://github.com/snowpeak/EasyDocker#readme",
+  "dependencies": {
+    "electron": "^8.2.5"
+  }
+}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>First Electron App</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+
+    <script>
+        // JSが動かない対策 https://miyanetdev.com/archives/1162
+        if (typeof module === 'object') {
+            window.module = module;
+            module = undefined;
+        }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="./main.js"></script>
+    <script>if (window.module) module = window.module;</script>
+</head>
+
+<body>
+    <main class="p-3">
+        <!-- 4個分のタブ -->
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a href="#containerTab" class="nav-link active" data-toggle="tab">コンテナ管理</a>
+            </li>
+            <li class="nav-item">
+                <a href="#imageTab" class="nav-link" data-toggle="tab">イメージ管理</a>
+            </li>
+            <li class="nav-item">
+                <a href="#settingTb" class="nav-link" data-toggle="tab">Docker設定</a>
+            </li>
+        </ul>
+        <!-- タブコンテンツ -->
+        <div class="tab-content">
+            <div id="containerTab" class="tab-pane active">
+                <h1>コンテナ一覧</h1>
+                <table>
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
+            <div id="imageTab" class="tab-pane">
+                イメージ一覧
+            </div>
+            <div id="settingTab" class="tab-pane">
+                Dokcer設定
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>
