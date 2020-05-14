@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <title>First Electron App</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+
+    <!-- https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css -->
+    <link rel="stylesheet" href="./css/bootstrap.min.css" />
 
     <script>
         // JSが動かない対策 https://miyanetdev.com/archives/1162
@@ -13,9 +15,18 @@
             module = undefined;
         }
     </script>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <!-- https://code.jquery.com/jquery-3.3.1.slim.min.js -->
+    <script src="./js/jquery-3.3.1.slim.min.js"></script>
+
+    <!-- https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js -->
+    <script src="./js/popper.min.js"></script>
+
+    <!-- https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js -->
+    <script src="./js/bootstrap.min.js"></script>
+
+    <!-- https://cdn.jsdelivr.net/npm/vue -->
+    <script src="./js/vue.js"></script>
+
     <script src="./main.js"></script>
     <script>if (window.module) module = window.module;</script>
 </head>
@@ -38,20 +49,84 @@
         <div class="tab-content">
             <div id="containerTab" class="tab-pane active">
                 <h1>コンテナ一覧</h1>
-                <table>
+                <div v-if="!init">コンテナ情報を取得中です</div>
+                <div v-if="init && containers.length == 0">作成済みコンテナはありません。</div>
+                <table v-if="containers.length > 0" border="1">
                     <tbody>
-
+                        <tr>
+                            <th>ID</th>
+                            <th>ラベル</th>
+                            <th>ステータス</th>
+                            <th>ポート</th>
+                        </tr>
+                         <tr v-for="container in containers">
+                            <td>{{container.id}}</td>
+                            <td>{{container.image}}</td>
+                            <td>{{container.state}}</td>
+                            <td v-html="container.port"></td>
+                        </th>
                     </tbody>
                 </table>
             </div>
             <div id="imageTab" class="tab-pane">
-                イメージ一覧
+                <h1>イメージ一覧</h1>
+                <div v-if="!init">イメージ情報を取得中です</div>
+                <div v-if="init && images.length == 0">登録済みイメージはありません。</div>
+                <table v-if="images.length > 0" border="1">
+                    <tbody>
+                        <tr>
+                            <th>ID</th>
+                            <th>サイズ</th>
+                            <th>タグ</th>
+                        </tr>
+                         <tr v-for="image in images">
+                            <td>{{image.id}}</td>
+                            <td>{{image.size}}</td>
+                            <td>{{image.tag}}</td>
+                        </th>
+                    </tbody>
+                </table>
             </div>
             <div id="settingTab" class="tab-pane">
-                Dokcer設定
+                <h1>Dokcer設定: 工事中</h1>
+                下記のような設定を行う予定
+                <ul>
+                    <li>DokerAPIのURL(現在は localhost:2375 固定)</li>
+                    <li>Dokerイメージをロードするときの初期ディレクトリ</li>
+                    <li>Dokerイメージを書き出すときのgzip圧縮有無(現在は必ず圧縮する)</li>
+                </ul>
             </div>
         </div>
     </main>
+
+    <script>
+        var vueContainerTab = new Vue({
+            el : '#containerTab',
+            data: {
+                init : false,
+                containers : [],
+            },
+            methods: {
+                setContainers: function (x_containers) {
+                    this.init = true
+                    this.containers = x_containers
+                },
+            }
+        })
+        var vueImageTab = new Vue({
+            el : '#imageTab',
+            data: {
+                init : false,
+                images : [],
+            },
+            methods: {
+                setImages: function (x_images) {
+                    this.init = true
+                    this.images = x_images
+                },
+            }
+        })
+    </script>
 </body>
 
 </html>

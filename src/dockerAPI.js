@@ -1,38 +1,73 @@
-exports.getContainers = getContainers = function(){
-  options = getOptions("/containers/json?all=true", "GET", "")
-  http = require('http');
+/**
+ * コンテナの一覧を取得する
+ * @param x_callback(containers)
+ * containers=[{id, state, image, ports=[port]}]
+ */
+exports.getContainers = getContainers = function(x_callback){
+  var options = getOptions("/containers/json?all=true", "GET", "")
+  var http = require('http');
   let req = http.request(options, (res) => {
     //console.log('STATUS: ' + res.statusCode);
     //console.log('HEADERS: ' + JSON.stringify(res.headers));
     res.setEncoding('utf8');
+
+    var retValues = []
+
+    var jsonStr = ""
     res.on('data', (chunk) => {
-      containers = JSON.parse(chunk)
+      jsonStr += chunk
+    })
+
+    res.on('end', () => {
+      var containers = null
+      try{
+        containers = JSON.parse(jsonStr)
+      }catch(e){
+        console.log("------------ getContainers() error: " + jsonStr)
+        throw e
+      }
+
       //console.log(containers)
 
-        containers.forEach(function(container){
-          console.log("------------ container ------------")
-          //console.log(container)
-          console.log("ID=" + container['Id'])
-          console.log("Image=" + container['Image'])
-          console.log("State=" + container['State'])
-
-          container['Ports'].forEach(function(port){
-            console.log("localhost:" + port['PublicPort'] + "-->" + port['PrivatePort'])
-          })
+      containers.forEach(function (container) {
+        //console.log(container)
+        var id = container['Id'];
+        var image = container['Image']
+        var state = container['State']
+        /*
+        console.log("ID=" + container['Id'])
+        console.log("Image=" + container['Image'])
+        console.log("State=" + container['State'])
+        */
+        var ports = []
+        container['Ports'].forEach(function (x_port) {
+          if(x_port.PublicPort != undefined){
+            port = "localhost:" + x_port['PublicPort'] + " --> " + x_port['PrivatePort'];
+            ports.push(port)
+          }
         })
-      });
+        var value = { 'id': id, 'image': image, 'state': state, 'ports': ports }
+        retValues.push(value);
+      })
+
+      x_callback(retValues)
     });
-    req.on('error', (e) => {
+  });
+  req.on('error', (e) => {
     console.log('problem with request: ' + e.message);
   });
   req.end();
 }
 
-exports.createContainer = createContainer = function(){
+/**
+ * @param x_image イメージID(または イメージのrepo:tag)
+ * @param x_callback(x_id) 生成したイメージのID
+ */
+exports.createContainer = createContainer = function( x_image, x_callback ){
   let postData = {
     "Hostname": "rakwf21",
     "Cmd": ["/sbin/init"],
-    "Image" : "rakwf21:7610",
+    "Image" : x_image,
     "ExposedPorts":{
       "8080/tcp":{},
       "22/tcp":{},
@@ -52,13 +87,17 @@ exports.createContainer = createContainer = function(){
   http = require('http');
   let req = http.request(options, (res) => {
     res.setEncoding('utf8');
+    
+    var jsonStr = "";
     res.on('data', (chunk) => {
-      retJson = JSON.parse(chunk)
-      console.log(retJson)
+      jsonStr += chunk
+    })
+    res.on('end', () => {
+      var retJson = JSON.parse(jsonStr)
       containerID = retJson['Id'];
-      startContainer(containerID)
-      getContainers();
+      x_callback( containerID )
     });
+    
     req.on('error', (e) => {
       console.log('problem with request: ' + e.message);
     })
@@ -67,6 +106,11 @@ exports.createContainer = createContainer = function(){
   req.end();
 }
 
+/**
+ * createしたコンテナを開始する
+ * @param x_id コンテナID
+ * @param x_callback( x_status ) //204は成功, -1は通信失敗
+ */
 exports.startContainer = startContainer = function( x_id ){
   path = "/containers/" + x_id + "/start"
   console.log(path)
@@ -74,45 +118,75 @@ exports.startContainer = startContainer = function( x_id ){
   http = require('http');
   let req = http.request(options, (res) => {
     console.log('STATUS: ' + res.statusCode); // 204 success
+    x_callback(res.statusCode)
+
     req.on('error', (e) => {
       console.log('problem with request: ' + e.message);
+      x_callback(-1);
     })
   })
   req.end();
 }
 
-exports.stopContainer = stopContainer = function( x_id ){
+/**
+ * コンテナを停止する
+ * @param x_id 停止対象のコンテナID
+ * @param x_callback( x_status ) // 204は成功
+ */
+exports.stopContainer = stopContainer = function( x_id, x_callback ){
   path = "/containers/" + x_id + "/stop"
   console.log(path)
   options = getOptions(path, "POST")
   http = require('http');
   let req = http.request(options, (res) => {
     console.log('STATUS: ' + res.statusCode); //204 success
+    x_callback(res.statusCode)
+
     req.on('error', (e) => {
       console.log('problem with request: ' + e.message);
+      x_callback(-1);
     })
   })
   req.end();
 }
 
-exports.prune = prune = function (x_id) {
+/**
+ * 不要コンテナを削除する
+ * @param x_callback(x_status) //204は成功
+ */
+exports.prune = prune = function (x_callback) {
   path = "/containers/prune"
   options = getOptions(path, "POST")
   http = require('http');
   let req = http.request(options, (res) => {
     console.log('STATUS: ' + res.statusCode); //204 success
+
+    var jsonStr = "";
     res.on('data', (chunk) => {
-      retJson = JSON.parse(chunk)
+      jsonStr += chunk
+    })
+
+    res.on('end', () => {
+      var retJson = JSON.parse(jsonStr)
       console.log(retJson)
+      x_callback(res.statusCode)
+
     });
     req.on('error', (e) => {
       console.log('problem with request: ' + e.message);
+      x_callback(-1);
     })
   })
   req.end();
 }
 
-exports.exportContainer = exportContainer = function (x_id, x_filepath) {
+/**
+ * コンテナをエクスポートする
+ * @param x_id コンテナID
+ * @param x_filepath 書き出し先
+ * @param x_callback(x_status) 処理完了時に呼び出す
+ */
+exports.exportContainer = exportContainer = function (x_id, x_filepath, x_callback) {
   // 出力先
   fs = require('fs')
   outFile = fs.createWriteStream(x_filepath);
@@ -132,11 +206,12 @@ exports.exportContainer = exportContainer = function (x_id, x_filepath) {
     });
     res.on('end', function () {
       console.log('STATUS: ' + res.statusCode); //204 success
+      x_callback(res.statusCode)
     });
   });
   req.on('error', function (err) {
     console.log('Error: ', err);
-    return;
+    x_callback(-1)
   });
 }
 
@@ -151,20 +226,32 @@ exports.exportContainer = exportContainer = function (x_id, x_filepath) {
 exports.getImages = getImages = function (x_callback) {
   var retImages = []
 
-  options = getOptions("/images/json?all=true", "GET", "")
-  http = require('http');
+  var options = getOptions("/images/json?all=true", "GET", "")
+  var http = require('http');
   let req = http.request(options, (res) => {
     res.setEncoding('utf8');
+
+    var jsonStr = "";
+    // getImages完了時にreturnする
     res.on('data', (chunk) => {
-      images = JSON.parse(chunk)
+      jsonStr += chunk;
+    })
+
+    res.on('end', () => {
+      var images = null
+      try{
+        images = JSON.parse(jsonStr)
+      }catch(e){
+        console.log("------------ getImages() error: " + jsonStr);
+        throw e
+      }
       images.forEach(function (image) {
-        console.log("------------ container ------------")
         //console.log(container)
-        id = image['Id']
-        size = image['Size']
+        var id = image['Id']
+        var size = image['Size']
         console.log("ID=" + id + ", Size=" + size)
        
-        tag = ""
+        var tag = ""
         image['RepoTags'].forEach(function (repotag) {
           if(tag != ""){
             tag += ","
@@ -173,11 +260,8 @@ exports.getImages = getImages = function (x_callback) {
         })
         retImages.push({'id':id, 'size':size, 'tag': tag});
       })
-    });
-    // getImages完了時にreturnする
-    res.on('end', () => {
       x_callback(retImages);
-    })
+    });
     return retImages;
   });
   req.on('error', (e) => {
@@ -188,16 +272,38 @@ exports.getImages = getImages = function (x_callback) {
   //return new Promise(function(resolve, reject){})
 }
 
-exports.importImage = importImage = function(x_imgFile){
+/**
+ * イメージをロードする
+ * @param x_imgFile イメージファイルのパス
+ * @param x_repo
+ * @param x_tag
+ * @param x_callback(x_status)
+ */
+exports.importImage = importImage = function(x_imgFile, x_repo, x_tag, x_callback){
   var containerID = null;
-  options = getOptions("/images/create?fromSrc=-&repo=test&tag=test1", "POST")
+  url = "/images/create?fromSrc=-"
+  if(x_repo != null & x_repo != ""){
+    url += ("?repo=" + x_repo)
+  }
+  if(x_tag != null & x_tag != ""){
+    url += ("?tag=" + x_tag)
+  }
+  options = getOptions(url, "POST")
+
   http = require('http');
   let req = http.request(options, (res) => {
     res.setEncoding('utf8');
+
+    var jsonStr = "";
     res.on('data', (chunk) => {
-      retJson = JSON.parse(chunk)
+      jsonStr += chunk
+    })
+    res.on('end', () => {
+      var retJson = JSON.parse(jsonStr)
       console.log(retJson)
+      x_callback(res.statusCode)
     });
+ 
     req.on('error', (e) => {
       console.log('problem with request: ' + e.message);
     })
@@ -207,17 +313,7 @@ exports.importImage = importImage = function(x_imgFile){
   length = 0;
   fs = require('fs')
   inStream = fs.createReadStream(x_imgFile);
-  inStream.pipe(req)
-  /*
-  inStream.on('data', (chunk) => {
-    length += chunk.byteLength
-    req.write(chunk);
-  })
-  inStream.on('end', () => {
-    console.log("upload finished:" + length)
-    req.end();
-  })
-  */
+  inStream.pipe(req);
 }
 //------------------
 // private method

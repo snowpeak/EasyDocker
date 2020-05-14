@@ -32,12 +32,15 @@ function createWindow () {
 //---------------------------------
 // プロキシ設定
 // https://qiita.com/dojyorin/items/12a0f63c6bea24bdfb21
+/*
 app.on("login", (event, webContents, request, authInfo, callback)=>{
     if(authInfo.isProxy){
         event.preventDefault();
-        callback('aa130030', 'i4smatsuda');
+        callback('userid', 'password');
     }
 });
+*/
+
 app.on('ready', createWindow);
 app.on('activate', () => {
     if (win === null) {
