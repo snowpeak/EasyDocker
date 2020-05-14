@@ -35,7 +35,6 @@ function createWindow () {
 app.on("login", (event, webContents, request, authInfo, callback)=>{
     if(authInfo.isProxy){
         event.preventDefault();
-        // ほげほげ
         callback('aa130030', 'i4smatsuda');
     }
 });
