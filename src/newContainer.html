@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css -->
+    <link rel="stylesheet" href="./css/bootstrap.min.css" />
+    <link rel="stylesheet" href="./fontawesome/css/all.css" />
+    <link rel="stylesheet" href="./css/easydocker.css" />
+
+    <!-- ============================ -->
+    <!-- JS読み込み                    -->
+    <!-- ============================ -->
+    <script>
+        // JSが動かない対策 https://miyanetdev.com/archives/1162
+        if (typeof module === 'object') {
+            window.module = module;
+            module = undefined;
+        }
+    </script>
+  
+    <!-- https://cdn.jsdelivr.net/npm/vue -->
+    <script src="./js/vue.js"></script>
+    
+    <!-- script src="./newContainer.js"></script -->
+    <script>if (window.module) module = window.module;</script>
+
+    <title>Easy Docker</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row bs-callout bs-callout-info">
+            <h4 id="dealing-with-specificity">新しいコンテナを作成します</h4>
+        </div>
+        <div id="app">
+            <form>
+            <div class="form-group row">
+                <label for="image_tag" class="col-sm-4 col-form-label">イメージTag</label>
+                <div class="col-sm-8">
+                    <input type="text" readonly class="form-control-plaintext" 
+                        id="image_tag"  v-model="image_tag"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="image_id" class="col-sm-4 col-form-label">イメージID</label>
+                <div class="col-sm-8">
+                    <input type="text" readonly class="form-control-plaintext" 
+                        id="image_id"  v-model="image_id"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="image_id" class="col-sm-4 col-form-label">サービス自動起動</label>
+                <div class="col-sm-8">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio"
+                            id="privileged_true" v-model="privileged" value="true">
+                        <label class="form-check-label" for="privileged_true">する</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio"
+                            id="privileged_false" v-model="privileged" value="false">
+                        <label class="form-check-label" for="privileged_false">しない</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="hostname" class="col-sm-4 col-form-label">ホスト名</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" 
+                        id="hostname"  v-model="hostname"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <!-- 転送 1つめ -->
+                <span class="col-sm-4">
+                    <label for="port01type" class="col-form-label">ポート転送</label>
+                    <i class="far fa-question-circle text-info" data-toggle="tooltip" data-placement="top" title="HOST --&gt; Container"></i>
+                </span>
+                <div class="col-sm-3">
+                    <select class="form-control" id="port01type" v-model="port01type">
+                        <option>tcp</option>
+                        <option>udp</option>
+                      </select>
+                </div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" 
+                        id="port01from"  v-model="port01from"/>
+                </div>
+                <label col-sm-1->--&gt;</label>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" 
+                        id="port01to"  v-model="port01to"/>
+                </div>
+                <div class="col-sm-2"></div>
+
+                <!-- 転送 2つ目 -->
+                <label class="col-sm-4"></label>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" 
+                        id="port02from"  v-model="port02from"/>
+                </div>
+                <label col-sm-1->--&gt;</label>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" 
+                        id="port02to"  v-model="port02to"/>
+                </div>
+
+                <!-- 転送 3つ目 -->
+                <label class="col-sm-4"></label>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" 
+                        id="port03from"  v-model="port03from"/>
+                </div>
+                <label col-sm-1->--&gt;</label>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" 
+                        id="port03to"  v-model="port03to"/>
+                </div>  
+                
+                <!-- 転送 4つ目 -->
+                <label class="col-sm-4"></label>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" 
+                        id="port04from"  v-model="port04from"/>
+                </div>
+                <label col-sm-1->--&gt;</label>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" 
+                        id="port04to"  v-model="port04to"/>
+                </div>                
+            </div>
+
+            <!-- button -->
+            <div class="form-group row">
+                <div class="col-sm-3"></div>
+                <div class="col-sm-auto">
+                    <button type="button" class="btn btn-success">作成</button>
+                    <button type="button" class="btn btn-light">キャンセル</button>
+                    <button type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="Tooltip on top">
+                        Tooltip on top
+                      </button>
+                </div>
+                <div class="col-sm-2"></div>
+            </div>
+
+        </form>
+        </div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+        const { dockerAPI } = require('./dockerAPI');
+        var app = new Vue({
+            el: '#app',
+            data: {
+                image_tag: "",
+                image_id: "",
+                privileged: "true",
+                hostname: "rakwf21",
+                port01type: "tcp",   port01from: "8080",   port01to: "8080",
+                port02type: "tcp",   port02from: "22",     port02to: "22",
+                port03type: "tcp",   port03from: "",       port03to: "",
+                port04type: "tcp",   port04from: "",       port04to: "",
+            },
+            methods: {
+                doInit: function (x_imageid, x_tag) {
+                    alert("do Init")
+                    this.image_id = x_imageid;
+                    this.image_tag = x_tag;
+                },
+                doSubmit: function () {
+                    var arg = {
+                        image_id: this.image_tag,
+                        privileged: this.privileged,
+                        hostname: this.hostname,
+                        port: [
+                            [this.port01from, this.port01to],
+                            [this.port02from, this.port02to],
+                            [this.port03from, this.port03to],
+                            [this.port04from, this.port04to],
+                        ],
+                    }
+                    ipcRenderer.send('async_newContainer_run', arg);
+                }
+            }
+        })
+
+        // メインプロセスからの通信受け取り
+        ipcRenderer.on('async_newContainer_set', function (event, x_imageid, x_tag) {
+            console.log(x_imageid + ":" + x_tag);
+            app.doInit(x_imageid, x_tag)
+        })
+
+    </script>
+
+    <!-- ================================= -->
+    <!-- JS読み込み(Bootstrapは最後らしい)   -->
+    <!-- ================================= -->
+    <script>
+        // JSが動かない対策 https://miyanetdev.com/archives/1162
+        if (typeof module === 'object') {
+            window.module = module;
+            module = undefined;
+        }
+    </script>
+    <!-- https://code.jquery.com/jquery-3.3.1.slim.min.js -->
+    <script src="./js/jquery-3.3.1.slim.min.js"></script>
+    
+    <!-- https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js -->
+    <script src="./js/popper.min.js"></script>
+    <!-- https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js -->
+    <script src="./js/bootstrap.min.js"></script>
+    <script>
+        $(function () {
+          $('[data-toggle="tooltip"]').tooltip()
+        })
+    </script>
+
+    <script>if (window.module) module = window.module;</script>
+    </body>
+
+</html>

@@ -12,8 +12,13 @@ window.onload = function(){
                 + x_image.size + "\n"
                 + x_image.tag);
                 */
+               var idStr = x_image.id;
+               var idx = idStr.indexOf(':')
+               if(idx >= 0 ){
+                   idStr = idStr.substring(idx+1)
+               }
                var image = {
-                "id": x_image.id,
+                "id": idStr,
                 "size": parseInt(x_image.size/1024/1024)+ "MB",
                 "tag": x_image.tag,
             }

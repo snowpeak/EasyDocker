@@ -1,11 +1,16 @@
 const {app, Menu, BrowserWindow} = require('electron');
-let win;
+let mainWin;
+let newContainerWin;
 
-function createWindow () {
+function initApp(){
+  mainWin = createWindow(`file://${__dirname}/main.html`, 1200, 900, true);
+}
+
+function createWindow (x_path, x_width, x_height, x_debug) {
   // ブラウザウィンドウを作成
-  win = new BrowserWindow({
-        width: 1000, 
-        height: 900,
+  var win = new BrowserWindow({
+        width: x_width, 
+        height: x_height,
         webPreferences: { nodeIntegration: true}
     });
     
@@ -13,18 +18,20 @@ function createWindow () {
   // win.setSimpleFullScreen(true)
 
   // デベロッパーツール自動起動
-  win.webContents.openDevTools();
+  if(x_debug){
+    win.webContents.openDevTools();
+  }
 
   Menu.setApplicationMenu(null);
 
   //index.htmlをロード
-  win.loadURL(`file://${__dirname}/main.html`);
+  win.loadURL(x_path);
 
   //ウィンドウが閉じられると発生
   win.on('closed', () => {
     win = null
   });
-
+  return win;
 }
 
 //---------------------------------
@@ -40,11 +47,10 @@ app.on("login", (event, webContents, request, authInfo, callback)=>{
     }
 });
 */
-
-app.on('ready', createWindow);
+app.on('ready', initApp);
 app.on('activate', () => {
     if (win === null) {
-      createWindow();
+      mainWin = createWindow(`file://${__dirname}/main.html`, 1000, 900, true);
     }
   });
 
@@ -58,3 +64,30 @@ app.on('window-all-closed', () => {
 //---------------------------------
 // アプリ固有イベント
 //---------------------------------
+const {ipcMain} = require('electron');
+const docker = require("./dockerAPI")
+var count = 1;
+
+/**
+ * コンテナ作成 ポップアップ
+ */
+ipcMain.on('async_main_newContainer', function(x_event, x_imageid, x_tag){
+  var path = `file://${__dirname}/newContainer.html`
+  newContainerWin = createWindow(path, 600, 650, true);
+
+  newContainerWin.webContents.on('did-finish-load', ()=>{
+    // setter
+    newContainerWin.webContents.send('async_newContainer_set', x_imageid, x_tag);
+    console.log('newContainer win is ready!')
+  })
+
+  x_event.sender.send('asynchronous-reply', 'from index.js : ' + count++)
+})
+
+/**
+ * コンテナ作成 submit
+ */
+ipcMain.on('async_newContainer_submit', function(x_event, x_arg){
+  docker.createContainer();
+
+})  

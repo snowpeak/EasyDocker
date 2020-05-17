@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>First Electron App</title>
+    <title>EayDocker</title>
 
     <!-- https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css -->
     <link rel="stylesheet" href="./css/bootstrap.min.css" />
@@ -54,16 +54,16 @@
                 <table v-if="containers.length > 0" border="1">
                     <tbody>
                         <tr>
-                            <th>ID</th>
                             <th>ラベル</th>
                             <th>ステータス</th>
                             <th>ポート</th>
+                            <th>ID</th>
                         </tr>
                          <tr v-for="container in containers">
-                            <td>{{container.id}}</td>
                             <td>{{container.image}}</td>
                             <td>{{container.state}}</td>
                             <td v-html="container.port"></td>
+                            <td>{{container.id}}</td>
                         </th>
                     </tbody>
                 </table>
@@ -75,14 +75,16 @@
                 <table v-if="images.length > 0" border="1">
                     <tbody>
                         <tr>
-                            <th>ID</th>
-                            <th>サイズ</th>
                             <th>タグ</th>
+                            <th>ID</th>
+                            <th>起動</th>
+                            <th>サイズ</th>
                         </tr>
                          <tr v-for="image in images">
-                            <td>{{image.id}}</td>
-                            <td>{{image.size}}</td>
                             <td>{{image.tag}}</td>
+                            <td><button @click="vueImageTab.newContainer(image.id, image.tag)">起動</button></td>
+                            <td>{{image.size}}</td>
+                            <td>{{image.id}}</td>
                         </th>
                     </tbody>
                 </table>
@@ -100,6 +102,11 @@
     </main>
 
     <script>
+        const {ipcRenderer} = require('electron');
+        ipcRenderer.on('asynchronous-reply', function(event, x_arg){
+                        console.log( x_arg );
+                    })
+
         var vueContainerTab = new Vue({
             el : '#containerTab',
             data: {
@@ -124,6 +131,9 @@
                     this.init = true
                     this.images = x_images
                 },
+                newContainer: function(x_imageid, x_tag){
+                    ipcRenderer.send('async_main_newContainer', x_imageid, x_tag);
+                }
             }
         })
     </script>
