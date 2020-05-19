@@ -63,7 +63,8 @@ exports.getContainers = getContainers = function(x_callback){
  * @param x_image イメージID(または イメージのrepo:tag)
  * @param x_callback(x_id) 生成したイメージのID
  */
-exports.createContainer = createContainer = function( x_image, x_callback ){
+exports.createContainer = createContainer = function( x_postData, x_callback ){
+    /*
   let postData = {
     "Hostname": "rakwf21",
     "Cmd": ["/sbin/init"],
@@ -80,7 +81,9 @@ exports.createContainer = createContainer = function( x_image, x_callback ){
       }
     }
   };
-  let postDataStr = JSON.stringify(postData);
+  */  
+  let postDataStr = JSON.stringify(x_postData);
+  console.log( postDataStr );
 
   var containerID = null;
   options = getOptions("/containers/create", "POST", 'application/json', postDataStr)
@@ -93,6 +96,7 @@ exports.createContainer = createContainer = function( x_image, x_callback ){
       jsonStr += chunk
     })
     res.on('end', () => {
+      console.log('create container : '  + jsonStr);
       var retJson = JSON.parse(jsonStr)
       containerID = retJson['Id'];
       x_callback( containerID )

@@ -93,10 +93,15 @@
                     <input type="text" class="form-control" 
                         id="port01to"  v-model="port01to"/>
                 </div>
-                <div class="col-sm-2"></div>
 
                 <!-- 転送 2つ目 -->
                 <label class="col-sm-4"></label>
+                <div class="col-sm-3">
+                    <select class="form-control" id="port02type" v-model="port02type">
+                        <option>tcp</option>
+                        <option>udp</option>
+                      </select>
+                </div>
                 <div class="col-sm-2">
                     <input type="text" class="form-control" 
                         id="port02from"  v-model="port02from"/>
@@ -109,6 +114,12 @@
 
                 <!-- 転送 3つ目 -->
                 <label class="col-sm-4"></label>
+                <div class="col-sm-3">
+                    <select class="form-control" id="port03type" v-model="port03type">
+                        <option>tcp</option>
+                        <option>udp</option>
+                      </select>
+                </div>
                 <div class="col-sm-2">
                     <input type="text" class="form-control" 
                         id="port03from"  v-model="port03from"/>
@@ -121,6 +132,12 @@
                 
                 <!-- 転送 4つ目 -->
                 <label class="col-sm-4"></label>
+                <div class="col-sm-3">
+                    <select class="form-control" id="port04type" v-model="port04type">
+                        <option>tcp</option>
+                        <option>udp</option>
+                      </select>
+                </div>
                 <div class="col-sm-2">
                     <input type="text" class="form-control" 
                         id="port04from"  v-model="port04from"/>
@@ -136,11 +153,8 @@
             <div class="form-group row">
                 <div class="col-sm-3"></div>
                 <div class="col-sm-auto">
-                    <button type="button" class="btn btn-success">作成</button>
-                    <button type="button" class="btn btn-light">キャンセル</button>
-                    <button type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="Tooltip on top">
-                        Tooltip on top
-                      </button>
+                    <button type="button" class="btn btn-success" @click="doSubmit()">作成</button>
+                    <button type="button" class="btn btn-light" @click="window.close()">キャンセル</button>
                 </div>
                 <div class="col-sm-2"></div>
             </div>
@@ -151,7 +165,7 @@
 
     <script>
         const { ipcRenderer } = require('electron');
-        const { dockerAPI } = require('./dockerAPI');
+        const dockerAPI = require('./dockerAPI');
         var app = new Vue({
             el: '#app',
             data: {
@@ -166,23 +180,55 @@
             },
             methods: {
                 doInit: function (x_imageid, x_tag) {
-                    alert("do Init")
                     this.image_id = x_imageid;
                     this.image_tag = x_tag;
                 },
                 doSubmit: function () {
-                    var arg = {
-                        image_id: this.image_tag,
-                        privileged: this.privileged,
-                        hostname: this.hostname,
-                        port: [
-                            [this.port01from, this.port01to],
-                            [this.port02from, this.port02to],
-                            [this.port03from, this.port03to],
-                            [this.port04from, this.port04to],
-                        ],
+                	var privileged = ("true" == this.privileged);
+                	
+                	var postData = {
+                			    "Hostname": this.hostname,
+                			    "Cmd": ["/sbin/init"],
+                			    "Image" : this.image_id,
+                			    "ExposedPorts":{
+                                    //"8080/tcp":{},
+                                    //"22/tcp":{},
+                			    },
+                			    "HostConfig":{
+                			      "Privileged": privileged,
+                			      "PortBindings":{
+                			        //"8080/tcp":[ {"HostPort":"8080"} ],
+                			        //"22/tcp":[ {"HostPort":"22"} ],
+                			      }
+                			    }
+                			  };
+                	  
+                	var portsArray = [
+                	    [this.port01type, this.port01from, this.port01to],
+                	    [this.port02type, this.port02from, this.port02to],
+                	    [this.port03type, this.port03from, this.port03to],
+                	    [this.port04type, this.port04from, this.port04to]
+                	];
+                	
+                    for( var i=0; i<portsArray.length; i++ ){
+                        var ports = portsArray[i]
+                        const from = parseInt(ports[1]);
+                        if (isNaN(from)) { continue }
+
+                        const to = parseInt(ports[2]);
+                        if (isNaN(to)) { continue }
+                          
+                        var containerPort = ports[2] + "/" + ports[0]
+                          
+                        postData.ExposedPorts[containerPort] = {};
+                        postData.HostConfig.PortBindings[containerPort] = [{"HostPort": ports[1]}]
                     }
-                    ipcRenderer.send('async_newContainer_run', arg);
+                    console.log( postData )
+                    
+                    var thisCallback = function(x_id){
+                        alert("new container: " + x_id )
+                    }
+                    dockerAPI.createContainer(postData, thisCallback);
                 }
             }
         })
