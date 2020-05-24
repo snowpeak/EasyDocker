@@ -56,19 +56,30 @@
                         <tr>
                             <th>ラベル</th>
                             <th>ステータス</th>
+                            <th>操作</th>
                             <th>ポート</th>
-                            <th>ID</th>
+                            <!-- >th>ID</th -->
                         </tr>
                          <tr v-for="container in containers">
                             <td>{{container.image}}</td>
                             <td>{{container.state}}</td>
+                            <td>
+                                <!--  操作 -->
+                                <button type="button" class="btn btn-primary"
+                                    @click="runConsole(container.id)">接続</button>
+                                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteConfirm" 
+                                    @click="setModalValue(container.image, container.state, container.id)">削除</button>
+                            </td>
                             <td v-html="container.port"></td>
-                            <td>{{container.id}}</td>
+                            <!--  td>{{container.id}}</td -->
                         </th>
                     </tbody>
                 </table>
             </div>
             <div id="imageTab" class="tab-pane">
+                <div >
+                    <button type="button" class="btn btn-primary" @click="loadImage()">イメージ追加</button>
+                </div>
                 <h1>イメージ一覧</h1>
                 <div v-if="!init">イメージ情報を取得中です</div>
                 <div v-if="init && images.length == 0">登録済みイメージはありません。</div>
@@ -76,13 +87,17 @@
                     <tbody>
                         <tr>
                             <th>タグ</th>
-                            <th>ID</th>
-                            <th>起動</th>
+                            <th>操作</th>
                             <th>サイズ</th>
+                            <th>ID</th>
                         </tr>
                          <tr v-for="image in images">
                             <td>{{image.tag}}</td>
-                            <td><button @click="vueImageTab.newContainer(image.id, image.tag)">起動</button></td>
+                            <td>
+                                <button class="button button-success" @click="vueImageTab.newContainer(image.id, image.tag)">起動</button>
+                                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteImageConfirm" 
+                                    @click="vueImageTab.deleteImage(image.id, image.tag)">削除</button>
+                            </td>
                             <td>{{image.size}}</td>
                             <td>{{image.id}}</td>
                         </th>
@@ -100,9 +115,86 @@
             </div>
         </div>
     </main>
+    <div class="modal fade" id="deleteConfirm" tabindex="-1"
+        role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">コンテナを削除しますか</h5>
+                    
+                    <!--  右上の×ボタン -->
+                    <button type="button" class="close"
+                        data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group row">
+                            <label for="delImage" class="col-sm-2 col-form-label">Image</label>
+                            <div class="col-sm-10">
+                                <input type="text" readonly
+                                    class="form-control-plaintext"
+                                    id="delImage"
+                                    v-model="image">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="delStatus" class="col-sm-2 col-form-label">Status</label>
+                            <div class="col-sm-10">
+                                <input type="text" readonly
+                                    class="form-control-plaintext"
+                                    id="delStatus"
+                                    v-model="state">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="delId" class="col-sm-2 col-form-label">ID</label>
+                            <div class="col-sm-10">
+                                <input type="text" readonly
+                                    class="form-control-plaintext"
+                                    id="delID"
+                                    v-model="id">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" @click="doDelete()">実行</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <div class="modal fade" id="deleteImageConfirm" tabindex="-1" role="dialog" >
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="deleteImageConfirmText" class="modal-title" ></h5>
+                    
+                    <!--  右上の×ボタン -->
+                    <button type="button" class="close"
+                        data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" @click="doDelete()">実行</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script>
         const {ipcRenderer} = require('electron');
+        const dockerAPI = require('./dockerAPI');
+
         ipcRenderer.on('asynchronous-reply', function(event, x_arg){
                         console.log( x_arg );
                     })
@@ -118,6 +210,16 @@
                     this.init = true
                     this.containers = x_containers
                 },
+                runConsole: function( x_id ){
+                    const { spawn } = require('child_process');
+                    //docker exec -it イメージID /bin/bash
+                    const args = ["", "docker", "exec", "-it", x_id, "/bin/bash"]
+                    const child = spawn("start", args, { shell: true, stdio: "ignore" })
+                    child.unref(); // メインプロセスから切り離す
+                },
+                setModalValue: function( x_image, x_state, x_id ){
+                    deleteConfirm.setValue( x_image, x_state, x_id )
+                }
             }
         })
         var vueImageTab = new Vue({
@@ -131,8 +233,55 @@
                     this.init = true
                     this.images = x_images
                 },
+                loadImage: function(){
+                    ipcRenderer.send('async_main_loadImage');
+                },
                 newContainer: function(x_imageid, x_tag){
                     ipcRenderer.send('async_main_newContainer', x_imageid, x_tag);
+                },
+                deleteImage: function(x_imageid, x_tag){
+                    deleteImageConfirm.setId(x_imageid);
+                    $('#deleteImageConfirmText').html(x_tag + " のイメージを削除しますか？")
+                    //ipcRenderer.send('async_main_deleteImage', x_imageid, x_tag);
+                }
+            }
+        })
+        var deleteConfirm = new Vue({
+            el : '#deleteConfirm',
+            data: {
+                image : "",
+                state : "",
+                id : "",
+            },
+            methods: {
+                setValue: function (x_image, x_state, x_id) {
+                    this.image = x_image
+                    this.state = x_state
+                    this.id = x_id
+                },
+                doDelete: function () {
+                    dockerAPI.stopContainer(this.id, function(x_status){
+                        $('#deleteConfirm').modal('hide') // hide modal
+                        if(x_status == 204){
+                            dockerAPI.prune(function(x_status2){})
+                        }                        
+                    })
+                }
+            }
+        })
+        var deleteImageConfirm = new Vue({
+            el : '#deleteImageConfirm',
+            data: {
+                id : "",
+            },
+            methods: {
+                setId: function(x_id){
+                    this.id = x_id
+                },
+                doDelete: function () {
+                    dockerAPI.deleteImage(this.id, function(x_status){
+                        $('#deleteImageConfirm').modal('hide') // hide modal
+                    })
                 }
             }
         })

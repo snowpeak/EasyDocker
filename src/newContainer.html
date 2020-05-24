@@ -189,7 +189,7 @@
                 	var postData = {
                 			    "Hostname": this.hostname,
                 			    "Cmd": ["/sbin/init"],
-                			    "Image" : this.image_id,
+                			    "Image" : this.image_tag,
                 			    "ExposedPorts":{
                                     //"8080/tcp":{},
                                     //"22/tcp":{},
@@ -228,7 +228,7 @@
                     var thisCallback = function(x_id){
                         alert("new container: " + x_id )
                     }
-                    dockerAPI.createContainer(postData, thisCallback);
+                    dockerAPI.createContainer(postData, true, thisCallback);
                 }
             }
         })

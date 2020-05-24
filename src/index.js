@@ -1,6 +1,7 @@
 const {app, Menu, BrowserWindow} = require('electron');
-let mainWin;
-let newContainerWin;
+let s_mainWin;
+let s_newContainerWin;
+let s_loadImageWin;
 
 function initApp(){
   mainWin = createWindow(`file://${__dirname}/main.html`, 1200, 900, true);
@@ -8,30 +9,30 @@ function initApp(){
 
 function createWindow (x_path, x_width, x_height, x_debug) {
   // ブラウザウィンドウを作成
-  var win = new BrowserWindow({
+  s_mainWin = new BrowserWindow({
         width: x_width, 
         height: x_height,
         webPreferences: { nodeIntegration: true}
     });
     
   // ウィンドウ最大化
-  // win.setSimpleFullScreen(true)
+  // s_mainWin.setSimpleFullScreen(true)
 
   // デベロッパーツール自動起動
   if(x_debug){
-    win.webContents.openDevTools();
+    s_mainWin.webContents.openDevTools();
   }
 
   Menu.setApplicationMenu(null);
 
   //index.htmlをロード
-  win.loadURL(x_path);
+  s_mainWin.loadURL(x_path);
 
   //ウィンドウが閉じられると発生
-  win.on('closed', () => {
-    win = null
+  s_mainWin.on('closed', () => {
+    s_mainWin = null
   });
-  return win;
+  return s_mainWin;
 }
 
 //---------------------------------
@@ -49,8 +50,8 @@ app.on("login", (event, webContents, request, authInfo, callback)=>{
 */
 app.on('ready', initApp);
 app.on('activate', () => {
-    if (win === null) {
-      mainWin = createWindow(`file://${__dirname}/main.html`, 1000, 900, true);
+    if (s_mainWin === null) {
+      s_mainWin = createWindow(`file://${__dirname}/main.html`, 1000, 900, true);
     }
   });
 
@@ -65,29 +66,56 @@ app.on('window-all-closed', () => {
 // アプリ固有イベント
 //---------------------------------
 const {ipcMain} = require('electron');
-const docker = require("./dockerAPI")
+const dockerAPI = require("./dockerAPI")
 var count = 1;
 
 /**
- * コンテナ作成 ポップアップ
+ * Imageロード ポップアップ表示
+ */
+ipcMain.on('async_main_loadImage', function(x_event){
+  var path = `file://${__dirname}/loadImage.html`
+  s_loadImageWin = createWindow(path, 600, 650, true);
+
+//  win.webContents.on('did-finish-load', ()=>{
+//    // setter
+//    newContainerWin.webContents.send('async_newContainer_set', x_imageid, x_tag);
+//    console.log('newContainer win is ready!')
+//  })
+})
+/**
+ * Imageロード 実行
+ */
+ipcMain.on('async_loadImage_load', function(x_event, x_filepath, x_repo, x_tag){
+    dockerAPI.importImage(x_filepath, x_repo, x_tag, (x_errMsg)=>{
+        if(x_errMsg == null){
+            s_loadImageWin.close();
+        }else{
+            console.log('importImage error :' + x_errMsg);
+            x_event.sender.send('async_loadImage_load_res', x_errMsg);
+        }
+    });
+})
+
+
+
+/**
+ * コンテナ作成 ポップアップ表示
  */
 ipcMain.on('async_main_newContainer', function(x_event, x_imageid, x_tag){
   var path = `file://${__dirname}/newContainer.html`
-  newContainerWin = createWindow(path, 600, 650, true);
+  s_newContainerWin = createWindow(path, 600, 650, true);
 
-  newContainerWin.webContents.on('did-finish-load', ()=>{
+  s_newContainerWin.webContents.on('did-finish-load', ()=>{
     // setter
-    newContainerWin.webContents.send('async_newContainer_set', x_imageid, x_tag);
+    s_newContainerWin.webContents.send('async_newContainer_set', x_imageid, x_tag);
     console.log('newContainer win is ready!')
   })
 
   x_event.sender.send('asynchronous-reply', 'from index.js : ' + count++)
 })
-
 /**
  * コンテナ作成 submit
  */
 ipcMain.on('async_newContainer_submit', function(x_event, x_arg){
-  docker.createContainer();
-
+    dockerAPI.createContainer();
 })  

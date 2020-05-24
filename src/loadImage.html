@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css -->
+    <link rel="stylesheet" href="./css/bootstrap.min.css" />
+    <link rel="stylesheet" href="./fontawesome/css/all.css" />
+    <link rel="stylesheet" href="./css/easydocker.css" />
+
+    <!-- ============================ -->
+    <!-- JS読み込み                    -->
+    <!-- ============================ -->
+    <script>
+        // JSが動かない対策 https://miyanetdev.com/archives/1162
+        if (typeof module === 'object') {
+            window.module = module;
+            module = undefined;
+        }
+    </script>
+  
+    <!-- https://cdn.jsdelivr.net/npm/vue -->
+    <script src="./js/vue.js"></script>
+    
+    <script>if (window.module) module = window.module;</script>
+
+    <title>Easy Docker - LoadImage</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row bs-callout bs-callout-info">
+            <h4 id="dealing-with-specificity">Docker Imageをロードします</h4>
+        </div>
+        <div id="app">
+            <form>
+                <div class="form-group row">
+                    <label for="filepath"
+                        class="col-sm-3 col-form-label">Imageファイル</label>
+                    <div class="col-sm-7">
+                        <input type="text" class="form-control"
+                            id="filepath" v-model="filepath" />
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" class="btn btn-success"
+                            @click="openFile()">選択</button>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="image_tag"
+                        class="col-sm-3 col-form-label">タグ名</label>
+                    <div class="col-sm-3">
+                        <input type="text" class="form-control"
+                            id="repo" v-model="repo" />
+                    </div>
+                    <div class="col-sm-1">：</div>
+                    <div class="col-sm-3 text-sm-left">
+                        <input type="text" class="form-control" id="tag"
+                            v-model="tag" />
+                    </div>
+                </div>
+
+                <!-- button -->
+                <div class="form-group row">
+                    <div class="col-sm-3"></div>
+                    <div class="col-sm-auto">
+                        <button type="button" class="btn btn-success"  @click="doSubmit()">
+                          <span id="spinner" class="spinner-border spinner-border-sm" role="status" style="display:none"></span>
+                          <span>作成</span>
+                         </button>
+                        <button type="button" class="btn btn-light"
+                            @click="window.close()">キャンセル</button>
+                    </div>
+                    <div class="col-sm-2"></div>
+                </div>
+                <div class="form-group row">
+                    <div class="alert alert-danger col-sm-12"
+                        role="alert" data-dismiss="alert" id="alertMsg" style="display:none">
+                        <input type="text" class="form-control-plaintext" v-model="msg" />
+                        </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+
+    <script>
+        const dockerAPI = require('./dockerAPI');
+        const loadImage = require('./loadImage');
+        const { ipcRenderer } = require('electron');
+        var app = new Vue({
+            el: '#app',
+            data: {
+                filepath: "",
+                repo: "",
+                tag: "",
+                msg: "",
+                running: false,
+            },
+            methods: {
+                openFile: function () {
+                    loadImage.openFile((x_path)=>{this.filepath = x_path})
+                },
+                doSubmit: function () {
+                    if(this.running){
+                        alert("処理中です")
+                        return
+                    }
+                    if(this.repo.trim().length ==0 || this.tag.trim().length ==0 ){
+                        this.msg="タグを入力してください"
+                            $('#alertMsg').css("display", "");
+                        return
+                    }
+                    $('#alertMsg').css("display", "none");
+                    $('#spinner').css("display", "");
+                    this.running = true;
+                    ipcRenderer.send('async_loadImage_load', this.filepath, this.repo.trim(), this.tag.trim())
+                },
+            }
+        })
+
+        // メインプロセスからの通信受け取り
+        ipcRenderer.on('async_loadImage_load_res', function (event, x_errMsg) {
+            app.msg = x_errMsg;
+            $('#alertMsg').css("display", "");
+
+            $('#spinner').css("display", "none");
+            app.running = false;
+        })
+
+    </script>
+
+    <!-- ================================= -->
+    <!-- JS読み込み(Bootstrapは最後らしい)   -->
+    <!-- ================================= -->
+    <script>
+        // JSが動かない対策 https://miyanetdev.com/archives/1162
+        if (typeof module === 'object') {
+            window.module = module;
+            module = undefined;
+        }
+    </script>
+    <!-- https://code.jquery.com/jquery-3.3.1.slim.min.js -->
+    <script src="./js/jquery-3.3.1.slim.min.js"></script>
+    
+    <!-- https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js -->
+    <script src="./js/popper.min.js"></script>
+    <!-- https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js -->
+    <script src="./js/bootstrap.min.js"></script>
+    <script>
+        $(function () {
+          $('[data-toggle="tooltip"]').tooltip()
+        })
+    </script>
+
+    <script>if (window.module) module = window.module;</script>
+    </body>
+
+</html>

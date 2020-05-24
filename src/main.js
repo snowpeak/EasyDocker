@@ -1,33 +1,37 @@
 window.onload = function(){
-    this.initPage()
+    this.initPage() //タブにイベントを設定する
 
+    this.initContainerTab()　//コンテナ一覧表示
+    //this.initImageTab()     //イメージ一覧表示
+    
+}
+function initPage() {
+
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        var activatedTab = e.target.toString() // HtmlAnchorElement.toString()( full URL+#tabname )
+        var idx = activatedTab.lastIndexOf('#');
+        if(idx>0){
+            activatedTab = activatedTab.substring(idx+1)
+        }
+        
+        //var previous_tab = e.relatedTarget // previous tab( full URL+#tabname )
+
+        // 処理
+        if( activatedTab == "containerTab"){
+            //alert('refresh container list');
+            initContainerTab()
+        }else if( activatedTab == "imageTab"){
+            initImageTab()
+        }
+    })
+}
+
+/**
+ * コンテナタブの情報を最新にする
+ * @returns
+ */
+function initContainerTab(){
     var docker = require("./dockerAPI")
-
-    var callbackImages = function (x_images){
-        var retArray = [];
-        x_images.forEach(function(x_image){
-            /*
-            alert("---- images ----\n"
-                + x_image.id + "\n"
-                + x_image.size + "\n"
-                + x_image.tag);
-                */
-               var idStr = x_image.id;
-               var idx = idStr.indexOf(':')
-               if(idx >= 0 ){
-                   idStr = idStr.substring(idx+1)
-               }
-               var image = {
-                "id": idStr,
-                "size": parseInt(x_image.size/1024/1024)+ "MB",
-                "tag": x_image.tag,
-            }
-            retArray.push(image)
-        })
-        vueImageTab.setImages(retArray);
-    }
-    docker.getImages(callbackImages);
-
     function callbackContainers(x_containers){
         var retArray = [];
         x_containers.forEach(function(x_container){
@@ -55,16 +59,37 @@ window.onload = function(){
     }
     docker.getContainers(callbackContainers);
 }
-function initPage() {
 
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-        var activated_tab = e.target // activated tab
-        var previous_tab = e.relatedTarget // previous tab
-        // 処理
-        //alert(activated_tab + " activated")
+/**
+ * イメージタブの表示を最新にする
+ * @returns
+ */
+function initImageTab(){
+    var docker = require("./dockerAPI")
 
-        if( activated_tab == ""){
+    var callbackImages = function (x_images){
+        var retArray = [];
+        x_images.forEach(function(x_image){
+            /*
+            alert("---- images ----\n"
+                + x_image.id + "\n"
+                + x_image.size + "\n"
+                + x_image.tag);
+                */
+               var idStr = x_image.id;
+               var idx = idStr.indexOf(':')
+               if(idx >= 0 ){
+                   idStr = idStr.substring(idx+1)
+               }
+               var image = {
+                "id": idStr,
+                "size": parseInt(x_image.size/1024/1024)+ "MB",
+                "tag": x_image.tag,
+            }
+            retArray.push(image)
+        })
+        vueImageTab.setImages(retArray);
+    }
+    docker.getImages(callbackImages);
 
-        }
-    })
 }

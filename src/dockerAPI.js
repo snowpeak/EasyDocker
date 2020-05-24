@@ -61,9 +61,10 @@ exports.getContainers = getContainers = function(x_callback){
 
 /**
  * @param x_image イメージID(または イメージのrepo:tag)
+ * @param x_start true(コンテナを開始する) false(作成のみ)
  * @param x_callback(x_id) 生成したイメージのID
  */
-exports.createContainer = createContainer = function( x_postData, x_callback ){
+exports.createContainer = createContainer = function( x_postData, x_start, x_callback ){
     /*
   let postData = {
     "Hostname": "rakwf21",
@@ -99,7 +100,19 @@ exports.createContainer = createContainer = function( x_postData, x_callback ){
       console.log('create container : '  + jsonStr);
       var retJson = JSON.parse(jsonStr)
       containerID = retJson['Id'];
-      x_callback( containerID )
+      
+      if(x_start){
+          
+          this.startContainer(containerID, function(x_status){
+              if(x_status == 204){
+                  x_callback( containerID )
+              }else{
+                  alert('error:' + containerID + ":" + x_status)
+              }
+          })
+      }else{
+          x_callback( containerID )
+      }
     });
     
     req.on('error', (e) => {
@@ -115,15 +128,23 @@ exports.createContainer = createContainer = function( x_postData, x_callback ){
  * @param x_id コンテナID
  * @param x_callback( x_status ) //204は成功, -1は通信失敗
  */
-exports.startContainer = startContainer = function( x_id ){
+exports.startContainer = startContainer = function( x_id, x_callback ){
   path = "/containers/" + x_id + "/start"
   console.log(path)
   options = getOptions(path, "POST")
   http = require('http');
   let req = http.request(options, (res) => {
-    console.log('STATUS: ' + res.statusCode); // 204 success
-    x_callback(res.statusCode)
 
+    var jsonStr = "";
+    res.on('data', (chunk) => {
+      jsonStr += chunk
+    })
+    res.on('end', () => {
+        console.log('STATUS: ' + res.statusCode); // 204 success
+        console.log(jsonStr);
+        
+        x_callback(res.statusCode)
+    })
     req.on('error', (e) => {
       console.log('problem with request: ' + e.message);
       x_callback(-1);
@@ -143,13 +164,20 @@ exports.stopContainer = stopContainer = function( x_id, x_callback ){
   options = getOptions(path, "POST")
   http = require('http');
   let req = http.request(options, (res) => {
-    console.log('STATUS: ' + res.statusCode); //204 success
-    x_callback(res.statusCode)
-
-    req.on('error', (e) => {
-      console.log('problem with request: ' + e.message);
-      x_callback(-1);
-    })
+      var jsonStr = "";
+      res.on('data', (chunk) => {
+        jsonStr += chunk
+      })
+      res.on('end', () => {
+          console.log('STATUS: ' + res.statusCode); // 204 success
+          console.log(jsonStr);
+          
+          x_callback(res.statusCode)
+      })
+      req.on('error', (e) => {
+        console.log('problem with request: ' + e.message);
+        x_callback(-1);
+      })
   })
   req.end();
 }
@@ -266,7 +294,6 @@ exports.getImages = getImages = function (x_callback) {
       })
       x_callback(retImages);
     });
-    return retImages;
   });
   req.on('error', (e) => {
     console.log('problem with request: ' + e.message);
@@ -281,18 +308,18 @@ exports.getImages = getImages = function (x_callback) {
  * @param x_imgFile イメージファイルのパス
  * @param x_repo
  * @param x_tag
- * @param x_callback(x_status)
+ * @param x_callback(x_errMsg)  エラー発生時のみエラーメッセージを返す
  */
 exports.importImage = importImage = function(x_imgFile, x_repo, x_tag, x_callback){
   var containerID = null;
   url = "/images/create?fromSrc=-"
   if(x_repo != null & x_repo != ""){
-    url += ("?repo=" + x_repo)
+    url += ("&repo=" + x_repo)
   }
   if(x_tag != null & x_tag != ""){
-    url += ("?tag=" + x_tag)
+    url += ("&tag=" + x_tag)
   }
-  options = getOptions(url, "POST")
+  var options = getOptions(url, "POST")
 
   http = require('http');
   let req = http.request(options, (res) => {
@@ -305,7 +332,13 @@ exports.importImage = importImage = function(x_imgFile, x_repo, x_tag, x_callbac
     res.on('end', () => {
       var retJson = JSON.parse(jsonStr)
       console.log(retJson)
-      x_callback(res.statusCode)
+      if(res.statusCode == 200){
+          // 成功
+          x_callback(null)  
+      } else {
+          // 成功
+          x_callback(jsonStr)  
+      }
     });
  
     req.on('error', (e) => {
@@ -314,10 +347,52 @@ exports.importImage = importImage = function(x_imgFile, x_repo, x_tag, x_callbac
   })
 
   // アップロードするImaege
-  length = 0;
-  fs = require('fs')
-  inStream = fs.createReadStream(x_imgFile);
-  inStream.pipe(req);
+  try {
+      fs = require('fs')
+      fs.statSync(x_imgFile); // if no file --> throw e
+      
+      inStream = fs.createReadStream(x_imgFile);
+      inStream.pipe(req);
+   } catch(e) {
+      x_callback("指定したファイルが存在しません")
+      return;
+  }
+}
+
+/**
+ * イメージを削除するする
+ * @param x_id イメージID
+ * @param x_callback(x_status) 処理完了時に呼び出す
+ */
+exports.deleteImage = function (x_id, x_callback) {
+    
+    var options = getOptions("/images/" + x_id, "DELETE", "")
+    var http = require('http');
+    let req = http.request(options, (res) => {
+      res.setEncoding('utf8');
+
+      var jsonStr = "";
+      // deleteImages完了時にreturnする
+      res.on('data', (chunk) => {
+        jsonStr += chunk;
+      })
+
+      res.on('end', () => {
+        var json = null
+        try{
+          json = JSON.parse(jsonStr)
+        }catch(e){
+          console.log("------------ deleteImages() error: " + jsonStr);
+          throw e
+        }
+        console.log('STATUS: ' + res.statusCode); //200 success
+        x_callback(res.statusCode);
+      });
+    });
+    req.on('error', (e) => {
+      console.log('problem with request: ' + e.message);
+    });
+  req.end() // 送信
 }
 //------------------
 // private method
