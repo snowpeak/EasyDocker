@@ -215,8 +215,8 @@ exports.prune = prune = function (x_callback) {
 /**
  * コンテナをエクスポートする
  * @param x_id コンテナID
- * @param x_filepath 書き出し先
- * @param x_callback(x_status) 処理完了時に呼び出す
+ * @param x_filepath 書き出し先( tar.gzで書き出します )
+ * @param x_callback(x_errMsg) 成功時は x_errMsg = null
  */
 exports.exportContainer = exportContainer = function (x_id, x_filepath, x_callback) {
   // 出力先
@@ -237,8 +237,12 @@ exports.exportContainer = exportContainer = function (x_id, x_filepath, x_callba
       outFile.close()
     });
     res.on('end', function () {
-      console.log('STATUS: ' + res.statusCode); //204 success
-      x_callback(res.statusCode)
+      console.log('STATUS: ' + res.statusCode); // 200 success
+      if( res.statusCode != 200 ){
+          x_callback(res.statusCode);
+      }else{
+          x_callback(null);
+      }
     });
   });
   req.on('error', function (err) {
@@ -258,7 +262,7 @@ exports.exportContainer = exportContainer = function (x_id, x_filepath, x_callba
 exports.getImages = getImages = function (x_callback) {
   var retImages = []
 
-  var options = getOptions("/images/json?all=true", "GET", "")
+  var options = getOptions("/images/json", "GET", "")
   var http = require('http');
   let req = http.request(options, (res) => {
     res.setEncoding('utf8');
@@ -362,11 +366,11 @@ exports.importImage = importImage = function(x_imgFile, x_repo, x_tag, x_callbac
 /**
  * イメージを削除するする
  * @param x_id イメージID
- * @param x_callback(x_status) 処理完了時に呼び出す
+ * @param x_callback(x_errMsg) 成功時は x_errMsg = null
  */
 exports.deleteImage = function (x_id, x_callback) {
     
-    var options = getOptions("/images/" + x_id, "DELETE", "")
+    var options = getOptions("/images/" + x_id +"?force=true", "DELETE", "")
     var http = require('http');
     let req = http.request(options, (res) => {
       res.setEncoding('utf8');
@@ -386,7 +390,11 @@ exports.deleteImage = function (x_id, x_callback) {
           throw e
         }
         console.log('STATUS: ' + res.statusCode); //200 success
-        x_callback(res.statusCode);
+        if( res.statusCode != 200 ){
+            x_callback(jsonStr);
+        }else{
+            x_callback(null);
+        }
       });
     });
     req.on('error', (e) => {

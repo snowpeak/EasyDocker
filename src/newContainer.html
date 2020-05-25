@@ -80,6 +80,7 @@
                 </span>
                 <div class="col-sm-3">
                     <select class="form-control" id="port01type" v-model="port01type">
+                        <option>--</option>
                         <option>tcp</option>
                         <option>udp</option>
                       </select>
@@ -98,6 +99,7 @@
                 <label class="col-sm-4"></label>
                 <div class="col-sm-3">
                     <select class="form-control" id="port02type" v-model="port02type">
+                        <option>--</option>
                         <option>tcp</option>
                         <option>udp</option>
                       </select>
@@ -116,6 +118,7 @@
                 <label class="col-sm-4"></label>
                 <div class="col-sm-3">
                     <select class="form-control" id="port03type" v-model="port03type">
+                        <option>--</option>
                         <option>tcp</option>
                         <option>udp</option>
                       </select>
@@ -134,6 +137,7 @@
                 <label class="col-sm-4"></label>
                 <div class="col-sm-3">
                     <select class="form-control" id="port04type" v-model="port04type">
+                        <option>--</option>
                         <option>tcp</option>
                         <option>udp</option>
                       </select>
@@ -173,10 +177,10 @@
                 image_id: "",
                 privileged: "true",
                 hostname: "rakwf21",
-                port01type: "tcp",   port01from: "8080",   port01to: "8080",
-                port02type: "tcp",   port02from: "22",     port02to: "22",
-                port03type: "tcp",   port03from: "",       port03to: "",
-                port04type: "tcp",   port04from: "",       port04to: "",
+                port01type: "--",   port01from: "8080",   port01to: "8080",
+                port02type: "--",   port02from: "22",     port02to: "22",
+                port03type: "--",   port03from: "",       port03to: "",
+                port04type: "--",   port04from: "",       port04to: "",
             },
             methods: {
                 doInit: function (x_imageid, x_tag) {
@@ -211,17 +215,21 @@
                 	];
                 	
                     for( var i=0; i<portsArray.length; i++ ){
-                        var ports = portsArray[i]
-                        const from = parseInt(ports[1]);
+                        var portSetting = portsArray[i]
+                        if (portSetting[0] != "tcp" && portSetting[0] != "udp"){
+                            continue;
+                        }
+                        
+                        const from = parseInt(portSetting[1]);
                         if (isNaN(from)) { continue }
 
-                        const to = parseInt(ports[2]);
+                        const to = parseInt(portSetting[2]);
                         if (isNaN(to)) { continue }
                           
-                        var containerPort = ports[2] + "/" + ports[0]
+                        var containerPort = portSetting[2] + "/" + portSetting[0]
                           
                         postData.ExposedPorts[containerPort] = {};
-                        postData.HostConfig.PortBindings[containerPort] = [{"HostPort": ports[1]}]
+                        postData.HostConfig.PortBindings[containerPort] = [{"HostPort": portSetting[1]}]
                     }
                     console.log( postData )
                     
