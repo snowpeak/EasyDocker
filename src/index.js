@@ -1,4 +1,4 @@
-const s_debug = false
+const s_debug = true
 
 const {app, Menu, BrowserWindow} = require('electron');
 let s_mainWin;

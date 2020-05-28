@@ -55,24 +55,40 @@
                     <tbody>
                         <tr>
                             <th>ラベル</th>
-                            <th>ステータス</th>
+                            <th>動作状態</th>
                             <th>操作</th>
                             <th>ポート</th>
+                            <th>削除</th>
                             <!-- >th>ID</th -->
                         </tr>
                          <tr v-for="container in containers">
                             <td>{{container.image}}</td>
-                            <td>{{container.state}}</td>
+                            <td>{{container.state}}
+                                <span  v-if="container.state != 'running'">
+                                    <button type="button" class="btn btn-primary"
+                                        @click="startContainer(container.id)">開始</button>
+                                </span>
+                                <span  v-else>
+                                    <button type="button" class="btn btn-warning"  @click="stopContainer($event, container.id)">
+                                        <span class="spinner-border spinner-border-sm" role="status" style="display:none"></span>
+                                                                                                停止
+                                    </button>
+                                </span>
+                            </td>
                             <td>
                                 <!--  操作 -->
-                                <button type="button" class="btn btn-primary"
-                                    @click="runConsole(container.id)">接続</button>
+                                <span v-if="container.state =='running'">
+                                    <button type="button" class="btn btn-primary"
+                                        @click="runConsole(container.id)">接続</button>
+                                </span>
                                 <button type="button" class="btn btn-success"
                                     @click="exportContainer(container.id, container.image)">保存</button>
-                                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteConfirm" 
-                                    @click="setModalValue(container.image, container.state, container.id)">削除</button>
                             </td>
                             <td v-html="container.port"></td>
+                            <td>
+                                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteConfirm" 
+                                    @click="setModalValue(container.image, container.state, container.id)">削除</button>
+                            </tr>
                             <!--  td>{{container.id}}</td -->
                         </th>
                     </tbody>
@@ -201,19 +217,51 @@
         const dockerAPI = require('./dockerAPI');
 
         ipcRenderer.on('async_to_main_refreshImage', () => {
-                        initImageTab()
-                       })
+            initImageTab()
+           })
 
         var vueContainerTab = new Vue({
             el : '#containerTab',
             data: {
                 init : false,
                 containers : [], // {id:"", tag:"", size:byte数} の配列}
+                stopping: false,
             },
             methods: {
                 setContainers: function (x_containers) {
                     this.init = true
                     this.containers = x_containers
+                },
+                startContainer: function( x_id ){
+                    dockerAPI.startContainer(x_id, (x_newId, x_err)=>{
+                        if(x_err != null){
+                            alert( x_err );
+                        }
+                        initContainerTab()
+                    })
+                },
+                stopContainer: function( x_event, x_id ){
+                    if(x_event.target.tagName != 'BUTTON'){
+                        return;
+                    }
+                    
+                    if(this.stopping){
+                        alert('停止作業中です')
+                    }
+                    
+                    this.stopping = true;
+
+                    let spinner = x_event.target.children[0]
+                    spinner.style.display = ""
+                
+                    dockerAPI.stopContainer(x_id, (x_err)=>{
+                        if(x_err != null){
+                            alert( x_err );
+                        }
+                        this.stopping = false;
+                        spinner.style.display = "none"
+                        initContainerTab()
+                    })
                 },
                 runConsole: function( x_id ){
                     const { spawn } = require('child_process');
@@ -268,11 +316,15 @@
                     this.id = x_id
                 },
                 doDelete: function () {
+                    let containerID = this.id
                     $('#spinner').css("display", "")
-                    dockerAPI.stopContainer(this.id, function(x_status){
-                        $('#spinner').css("display", "none")
-                        $('#deleteConfirm').modal('hide') // hide modal
-                        dockerAPI.prune(function(x_status2){
+                    dockerAPI.stopContainer(this.id, function(x_err){
+                        dockerAPI.deleteContainer(containerID, function(x_err){
+                            if( x_err != null){
+                                alert(x_err)
+                            }
+                            $('#spinner').css("display", "none")
+                            $('#deleteConfirm').modal('hide') // hide modal
                             initContainerTab();
                         })
                     })

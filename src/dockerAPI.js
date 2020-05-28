@@ -62,7 +62,7 @@ exports.getContainers = getContainers = function(x_callback){
 /**
  * @param x_image イメージID(または イメージのrepo:tag)
  * @param x_start true(コンテナを開始する) false(作成のみ)
- * @param x_callback(x_id) 生成したイメージのID
+ * @param x_callback(x_id, x_err) 生成したイメージのID, x_err失敗時エラー内容
  */
 exports.createContainer = createContainer = function( x_postData, x_start, x_callback ){
     /*
@@ -84,7 +84,7 @@ exports.createContainer = createContainer = function( x_postData, x_start, x_cal
   };
   */  
   let postDataStr = JSON.stringify(x_postData);
-  console.log( postDataStr );
+//  console.log( postDataStr );
 
   var containerID = null;
   options = getOptions("/containers/create", "POST", 'application/json', postDataStr)
@@ -97,17 +97,23 @@ exports.createContainer = createContainer = function( x_postData, x_start, x_cal
       jsonStr += chunk
     })
     res.on('end', () => {
-      console.log('create container : '  + jsonStr);
+      //console.log('create container : '  + jsonStr);
       var retJson = JSON.parse(jsonStr)
       containerID = retJson['Id'];
-      
-      if(x_start){
+
+      console.log("createContainer statusCode:" + res.statusCode)
+      if(res.statusCode != 201){
+          // 失敗
+          x_callback( null, jsonStr );
+      }
           
-          this.startContainer(containerID, function(x_status){
-              if(x_status == 204){
+      if(x_start){
+          console.log("start container");
+          this.startContainer(containerID, function(x_err){
+              if(x_err == null ){
                   x_callback( containerID )
               }else{
-                  alert('error:' + containerID + ":" + x_status)
+                  x_callback( containerID, x_err )
               }
           })
       }else{
@@ -130,7 +136,7 @@ exports.createContainer = createContainer = function( x_postData, x_start, x_cal
  */
 exports.startContainer = startContainer = function( x_id, x_callback ){
   path = "/containers/" + x_id + "/start"
-  console.log(path)
+  //console.log(path)
   options = getOptions(path, "POST")
   http = require('http');
   let req = http.request(options, (res) => {
@@ -140,10 +146,12 @@ exports.startContainer = startContainer = function( x_id, x_callback ){
       jsonStr += chunk
     })
     res.on('end', () => {
-        console.log('STATUS: ' + res.statusCode); // 204 success
-        console.log(jsonStr);
-        
-        x_callback(res.statusCode)
+        if(res.statusCode == 204){
+            // 成功
+            x_callback(null)
+        }else{
+            x_callback(jsonStr)
+        }
     })
     req.on('error', (e) => {
       console.log('problem with request: ' + e.message);
@@ -156,7 +164,7 @@ exports.startContainer = startContainer = function( x_id, x_callback ){
 /**
  * コンテナを停止する
  * @param x_id 停止対象のコンテナID
- * @param x_callback( x_status ) // 204は成功
+ * @param x_callback( x_err ) 成功時はx_err=null
  */
 exports.stopContainer = stopContainer = function( x_id, x_callback ){
   path = "/containers/" + x_id + "/stop"
@@ -169,10 +177,12 @@ exports.stopContainer = stopContainer = function( x_id, x_callback ){
         jsonStr += chunk
       })
       res.on('end', () => {
-          console.log('STATUS: ' + res.statusCode); // 204 success
-          console.log(jsonStr);
-          
-          x_callback(res.statusCode)
+          if(res.statusCode == 204){
+              // 成功
+              x_callback(null)
+          }else{
+              x_callback(jsonStr)
+          }
       })
       req.on('error', (e) => {
         console.log('problem with request: ' + e.message);
@@ -183,15 +193,57 @@ exports.stopContainer = stopContainer = function( x_id, x_callback ){
 }
 
 /**
+ * コンテナを削除する
+ * @param x_id コンテナID
+ * @param x_callback(x_errMsg) 成功時は x_errMsg = null
+ */
+exports.deleteContainer = function (x_id, x_callback) {
+    console.log("delete: " + x_id)
+    var options = getOptions("/containers/" + x_id +"?force=true", "DELETE", "")
+    var http = require('http');
+    let req = http.request(options, (res) => {
+      res.setEncoding('utf8');
+
+      var jsonStr = "";
+      // deleteImages完了時にreturnする
+      res.on('data', (chunk) => {
+        jsonStr += chunk;
+      })
+
+      res.on('end', () => {
+        var json = null
+        try{
+            if(jsonStr.length > 0 ){
+                json = JSON.parse(jsonStr)
+            }
+        }catch(e){
+          console.log("------------ deleteContainer() error: " + jsonStr);
+          throw e
+        }
+        console.log('STATUS: ' + res.statusCode); //204 success
+        if( res.statusCode != 204 ){
+            x_callback(jsonStr);
+        }else{
+            x_callback(null);
+        }
+      });
+    });
+    req.on('error', (e) => {
+      console.log('problem with request: ' + e.message);
+    });
+  req.end() // 送信
+}
+
+/**
  * 不要コンテナを削除する
- * @param x_callback(x_status) //204は成功
+ * @param x_callback( x_err ) 成功時はx_err=null
  */
 exports.prune = prune = function (x_callback) {
   path = "/containers/prune"
   options = getOptions(path, "POST")
   http = require('http');
   let req = http.request(options, (res) => {
-    console.log('STATUS: ' + res.statusCode); //204 success
+    //console.log('STATUS: ' + res.statusCode); //204 success
 
     var jsonStr = "";
     res.on('data', (chunk) => {
@@ -199,10 +251,11 @@ exports.prune = prune = function (x_callback) {
     })
 
     res.on('end', () => {
-      var retJson = JSON.parse(jsonStr)
-      console.log(retJson)
-      x_callback(res.statusCode)
-
+        if(res.statusCode == 204){
+            x_callback(null)
+        }else{
+            x_callback(jsonStr)
+        }
     });
     req.on('error', (e) => {
       console.log('problem with request: ' + e.message);
@@ -237,7 +290,7 @@ exports.exportContainer = exportContainer = function (x_id, x_filepath, x_callba
       outFile.close()
     });
     res.on('end', function () {
-      console.log('STATUS: ' + res.statusCode); // 200 success
+      //console.log('STATUS: ' + res.statusCode); // 200 success
       if( res.statusCode != 200 ){
           x_callback(res.statusCode);
       }else{
@@ -285,7 +338,7 @@ exports.getImages = getImages = function (x_callback) {
         //console.log(container)
         var id = image['Id']
         var size = image['Size']
-        console.log("ID=" + id + ", Size=" + size)
+        //console.log("ID=" + id + ", Size=" + size)
        
         var tag = ""
         image['RepoTags'].forEach(function (repotag) {
@@ -335,7 +388,7 @@ exports.importImage = importImage = function(x_imgFile, x_repo, x_tag, x_callbac
     })
     res.on('end', () => {
       var retJson = JSON.parse(jsonStr)
-      console.log(retJson)
+      //console.log(retJson)
       if(res.statusCode == 200){
           // 成功
           x_callback(null)  
@@ -389,7 +442,7 @@ exports.deleteImage = function (x_id, x_callback) {
           console.log("------------ deleteImages() error: " + jsonStr);
           throw e
         }
-        console.log('STATUS: ' + res.statusCode); //200 success
+        //console.log('STATUS: ' + res.statusCode); //200 success
         if( res.statusCode != 200 ){
             x_callback(jsonStr);
         }else{

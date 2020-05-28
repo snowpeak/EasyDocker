@@ -157,7 +157,8 @@
             <div class="form-group row">
                 <div class="col-sm-3"></div>
                 <div class="col-sm-auto">
-                    <button type="button" class="btn btn-success" @click="doSubmit()">作成</button>
+                    <button type="button" class="btn btn-success" @click="doSubmit()">
+                    <span id="spinner" class="spinner-border spinner-border-sm" role="status" style="display:none"></span>作成</button>
                     <button type="button" class="btn btn-light" @click="window.close()">キャンセル</button>
                 </div>
                 <div class="col-sm-2"></div>
@@ -181,6 +182,7 @@
                 port02type: "--",   port02from: "22",     port02to: "22",
                 port03type: "--",   port03from: "",       port03to: "",
                 port04type: "--",   port04from: "",       port04to: "",
+                running : false,
             },
             methods: {
                 doInit: function (x_imageid, x_tag) {
@@ -188,6 +190,9 @@
                     this.image_tag = x_tag;
                 },
                 doSubmit: function () {
+                    if(this.running){
+                        alert('処理中です')
+                    }
                 	var privileged = ("true" == this.privileged);
                 	
                 	var postData = {
@@ -231,10 +236,17 @@
                         postData.ExposedPorts[containerPort] = {};
                         postData.HostConfig.PortBindings[containerPort] = [{"HostPort": portSetting[1]}]
                     }
-                    console.log( postData )
-                    
-                    var thisCallback = function(x_id){
-                        alert("new container: " + x_id )
+                    //console.log( postData )
+                    $('#spinner').css("display", "")
+                    this.running = true;                    
+                    var thisCallback = function(x_id, x_error){
+                        this.running = false;                    
+                        $("#spinner").css("display", "none");
+                        if(x_error != null){
+                            alert(x_error)
+                        } else {
+                            window.close();
+                        }
                     }
                     dockerAPI.createContainer(postData, true, thisCallback);
                 }
