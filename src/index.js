@@ -1,4 +1,4 @@
-const s_debug = true
+const s_debug = false
 
 const {app, Menu, BrowserWindow} = require('electron');
 let s_mainWin;
@@ -7,7 +7,7 @@ let s_newContainerWin;
 let s_loadImageWin;
 
 function initApp(){
-  s_mainWin = createWindow(`file://${__dirname}/main.html`, 1200, 900, true);
+  s_mainWin = createWindow(`file://${__dirname}/main.html`, 1200, 900, s_debug);
   Menu.setApplicationMenu(null);
 
   //ウィンドウが閉じられると発生
@@ -54,7 +54,7 @@ app.on("login", (event, webContents, request, authInfo, callback)=>{
 app.on('ready', initApp);
 app.on('activate', () => {
     if (s_mainWin === null) {
-      s_mainWin = createWindow(`file://${__dirname}/main.html`, 1000, 900, true);
+      s_mainWin = createWindow(`file://${__dirname}/main.html`, 1000, 900, s_debug);
     }
   });
 

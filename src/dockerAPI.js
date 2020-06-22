@@ -147,8 +147,14 @@ exports.startContainer = startContainer = function( x_id, x_callback ){
     })
     res.on('end', () => {
         if(res.statusCode == 204){
-            // 成功
-            x_callback(null)
+            // 成功, 起動時に時刻合わせをしておく
+            let dt = new Date();
+            let time = dt.getFullYear() + "-" + (dt.getMonth()+1) + "-" + dt.getDate()
+            time += " " + dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds()
+            let cmd = ["/usr/bin/date", "-s", time]
+    　　                  execCmd(x_id, "root", cmd, (x_result, x_data)=>{
+    　　                      x_callback(null)
+    　　            })
         }else{
             x_callback(jsonStr)
         }
@@ -232,6 +238,94 @@ exports.deleteContainer = function (x_id, x_callback) {
       console.log('problem with request: ' + e.message);
     });
   req.end() // 送信
+}
+
+/**
+ * createしたコンテナを開始する
+ * @param x_id コンテナID
+ * @param x_cmd 配列[ cmd, arg1, arg2, ...]
+ * @param x_callback( x_status, x_output ) //x_status:true成功, falase:失敗 // x_output 出力
+ */
+exports.execCmd = execCmd = function( x_id, x_user, x_cmd, x_callback ){
+  let cmdJson = {
+      "AttachStdin": false,
+      "AttachStdout": true,
+      "AttachStderr": true,
+      "DetachKeys": "ctrl-c",
+      "Tty": false,
+      "Cmd": x_cmd,
+      "User": x_user
+  }
+  let postDataStr = JSON.stringify(cmdJson);
+  path = "/containers/" + x_id + "/exec"
+  options = getOptions(path, "POST", 'application/json', postDataStr)  
+  
+  http = require('http');
+  let req = http.request(options, (res) => {
+
+    var jsonStr = "";
+    res.on('data', (chunk) => {
+      jsonStr += chunk
+    })
+    res.on('end', () => {
+        //console.log(jsonStr);
+        if(res.statusCode == 201){
+            // 成功
+            let execInfo = JSON.parse(jsonStr)
+            startExec(execInfo.Id, (x_success, x_output)=>{
+                x_callback(x_success, x_output)
+            })
+        }else{
+            x_callback(false, x_output)
+        }
+    })
+    req.on('error', (e) => {
+      console.log('problem with request: ' + e.message);
+      x_callback(-1);
+    })
+  })
+  req.write(postDataStr);
+  req.end();
+}
+
+/**
+ * execCmd で準備した環境を実際に実行する(戻り値は標準出力)
+ * @param x_id コンテナID
+ * @param x_cmd 配列[ cmd, arg1, arg2, ...]
+ * @param x_callback( x_status, x_output ) //x_status:true成功, falase:失敗 // x_output 出力
+ */
+startExec = function( x_id, x_callback ){
+  let cmdJson = {
+      "Detach": false,
+      "Tty": false,
+  }
+  let postDataStr = JSON.stringify(cmdJson);
+  path = "/exec/" + x_id + "/start"
+  options = getOptions(path, "POST", 'application/json', postDataStr)  
+  
+  http = require('http');
+  let req = http.request(options, (res) => {
+
+    var jsonStr = "";
+    res.on('data', (chunk) => {
+      jsonStr += chunk
+    })
+    res.on('end', () => {
+        //console.log(jsonStr);
+        if(res.statusCode == 200){
+            // 成功
+            x_callback(true, jsonStr)
+        }else{
+            x_callback(false, jsonStr)
+        }
+    })
+    req.on('error', (e) => {
+      console.log('problem with request: ' + e.message);
+      x_callback(-1);
+    })
+  })
+  req.write(postDataStr);
+  req.end();
 }
 
 /**

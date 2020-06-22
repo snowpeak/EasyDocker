@@ -233,7 +233,7 @@
                     this.containers = x_containers
                 },
                 startContainer: function( x_id ){
-                    dockerAPI.startContainer(x_id, (x_newId, x_err)=>{
+                    dockerAPI.startContainer(x_id, (x_err)=>{
                         if(x_err != null){
                             alert( x_err );
                         }

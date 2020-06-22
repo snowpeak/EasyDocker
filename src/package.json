@@ -1,6 +1,6 @@
 {
   "name": "easydocker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Docker GUI for beginners",
   "main": "index.js",
   "scripts": {
@@ -17,6 +17,9 @@
   },
   "homepage": "https://github.com/snowpeak/EasyDocker#readme",
   "dependencies": {
-    "electron": "^8.2.5"
+    "!electron": "^8.2.5"
+  },
+  "devDependencies": {
+    "electron-builder": "^22.7.0"
   }
 }
