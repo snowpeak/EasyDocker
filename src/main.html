@@ -7,6 +7,7 @@
 
     <!-- https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css -->
     <link rel="stylesheet" href="./css/bootstrap.min.css" />
+    <link rel="stylesheet" href="./css/easydocker.css" />
 
     <script>
         // JSが動かない対策 https://miyanetdev.com/archives/1162
@@ -58,6 +59,7 @@
                             <th>動作状態</th>
                             <th>操作</th>
                             <th>ポート</th>
+                            <th>メモ</th>
                             <th>削除</th>
                             <!-- >th>ID</th -->
                         </tr>
@@ -85,6 +87,8 @@
                                     @click="exportContainer(container.id, container.image)">保存</button>
                             </td>
                             <td v-html="container.port"></td>
+                            <td><pre style="margin-bottom:0" v-html="container.memo"></pre>
+                                <BR><a　style="color:blue;text-decoration:underline;font-style:oblique;cursor:pointer" @click="editContainerMemo(container.id)">edit</a></td>
                             <td>
                                 <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteConfirm" 
                                     @click="setModalValue(container.image, container.state, container.id)">削除</button>
@@ -216,11 +220,15 @@
         const {ipcRenderer} = require('electron');
         const dockerAPI = require('./dockerAPI');
 
-        ipcRenderer.on('async_to_main_refreshImage', () => {
-            initImageTab()
-           })
+        ipcRenderer.on('async_to_main_refreshContainer', () => {
+            initContainerTab()
+        })
 
-        var vueContainerTab = new Vue({
+       ipcRenderer.on('async_to_main_refreshImage', () => {
+            initImageTab()
+       })
+
+       var vueContainerTab = new Vue({
             el : '#containerTab',
             data: {
                 init : false,
@@ -272,6 +280,9 @@
                 },
                 exportContainer: function(x_id, x_tag){
                     ipcRenderer.send('async_main_exportContainer', x_id, x_tag);
+                },
+                editContainerMemo: function(x_id){
+                    ipcRenderer.send('async_main_editContainerMemo', x_id);
                 },
                 setModalValue: function( x_image, x_state, x_id ){
                     deleteConfirm.setValue( x_image, x_state, x_id )

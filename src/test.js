@@ -6,7 +6,7 @@ if(false){
     })
 }
 
-if(true){
+if(false){
     let dt = new Date();
     let time = dt.getFullYear() + "-" + (dt.getMonth()+1) + "-" + dt.getDate()
     time += " " + dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds()
@@ -24,4 +24,23 @@ if(false){
         console.log(x_data)
     })
 }
-//dockerAPI.execCmd()
+
+if(false){
+    sql = require('./libsrc/sqlite.js');
+    sql.initDB();
+    //sql.insert('idです', 'imageです', 'ポートです', 'メモです')
+    sql.getContainers((x_containers)=>{
+        console.log("DBの戻り値");
+        x_containers.forEach(function(x_container){
+            console.log(x_container);
+        })
+    });
+}
+
+if(true){
+    sql = require('./libsrc/sqlite.js');
+    sql.initDB();
+    sql.getContainer("0b9bc6b5ef7eaf140f62bff98694197917091cdde20f742a3142cb958e325d82", (x_container)=>{
+        console.log(x_container);
+    });
+}

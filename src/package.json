@@ -17,7 +17,8 @@
   },
   "homepage": "https://github.com/snowpeak/EasyDocker#readme",
   "dependencies": {
-    "!electron": "^8.2.5"
+    "!electron": "^8.2.5",
+    "sqlite3": "^5.0.0"
   },
   "devDependencies": {
     "electron-builder": "^22.7.0"

@@ -34,6 +34,8 @@ function initContainerTab(){
     var docker = require("./dockerAPI")
     function callbackContainers(x_containers){
         var retArray = [];
+        var idContainerMap = {}
+        
         x_containers.forEach(function(x_container){
             var portStr = "";
             x_container.ports.forEach(function(x_port){
@@ -47,15 +49,23 @@ function initContainerTab(){
                 "port" : portStr
             }
             retArray.push(container)
-            /*
-            alert("===container ===\n"
-            + container.id + "\n"
-            + container.image + "\n" 
-            + container.state + "\n"
-            + portStr);
-            */
+            
+            idContainerMap[x_container.id] = container;
         })
-        vueContainerTab.setContainers(retArray);
+        
+        let sql = require('./libsrc/sqlite.js');
+        sql.initDB();
+        sql.getContainers((x_containers)=>{
+            x_containers.forEach(function(x_container){
+                var foundContainer = idContainerMap[x_container.id];
+                if( foundContainer != null){
+                    foundContainer["port"] = x_container.port;
+                    foundContainer["memo"] = x_container.memo;
+                    console.log(foundContainer);
+                }
+            })
+            vueContainerTab.setContainers(retArray);
+        });
     }
     docker.getContainers(callbackContainers);
 }

@@ -1,8 +1,11 @@
-const s_debug = false
+const s_debug = true
 
 const {app, Menu, BrowserWindow} = require('electron');
+const sql = require('./libsrc/sqlite.js');
+
 let s_mainWin;
 let s_exportContainerWin;
+let s_editContainerMemo;
 let s_newContainerWin;
 let s_loadImageWin;
 
@@ -14,6 +17,8 @@ function initApp(){
   s_mainWin.on('closed', () => {
     s_mainWin = null
   });
+  
+  sql.initDB();
 }
 
 function createWindow (x_path, x_width, x_height, x_debug) {
@@ -83,16 +88,6 @@ ipcMain.on('async_main_exportContainer', function(x_event, x_id, x_tag){
       s_exportContainerWin.webContents.send('async_exportContainer_set', x_id, x_tag);
     })
 })
-
-/**
- * Imageロード ポップアップ表示
- */
-ipcMain.on('async_main_loadImage', function(x_event){
-    var path = `file://${__dirname}/loadImage.html`
-    s_loadImageWin = createWindow(path, 600, 650, s_debug);
-})
-
-
 /**
  * container --(export)--> Image 実行
  */
@@ -106,6 +101,51 @@ ipcMain.on('async_exportContainer_save', function(x_event, x_id, x_filepath){
         }
     });
 })
+
+/**
+ * container メモ編集 ポップアップ表示
+ */
+ipcMain.on('async_main_editContainerMemo', function(x_event, x_id){
+  var param_id = x_id;
+    
+  var path = `file://${__dirname}/editContainerMemo.html`
+  s_editContainerWin = createWindow(path, 600, 650, s_debug);
+  s_editContainerWin.webContents.on('did-finish-load', ()=>{
+      // setter
+      sql.getContainer(param_id, (x_container)=>{
+          console.log(x_container);
+          var thisMemo = "";
+          if(x_container != null){
+              thisMemo = x_container.memo;
+          }
+          s_editContainerWin.webContents.send('async_editContainerMemo_set', param_id, thisMemo);
+      });
+    })
+})
+/**
+ * container メモ保存
+ */
+ipcMain.on('async_editContainerMemo_save', function(x_event, x_id, x_memo){
+    sql.getContainer(x_id, (x_container)=>{
+        if(x_container ==  null){
+            sql.insert(x_id, null, null, x_memo);
+        } else {
+            sql.updateMemo(x_id, x_memo);
+        }
+        s_editContainerWin.close();
+        s_mainWin.webContents.send('async_to_main_refreshContainer');
+    });
+})
+
+
+/**
+ * Imageロード ポップアップ表示
+ */
+ipcMain.on('async_main_loadImage', function(x_event){
+    var path = `file://${__dirname}/loadImage.html`
+    s_loadImageWin = createWindow(path, 600, 650, s_debug);
+})
+
 
 /**
  * Imageロード 実行
@@ -133,6 +173,7 @@ ipcMain.on('async_main_newContainer', function(x_event, x_imageid, x_tag){
   s_newContainerWin.webContents.on('did-finish-load', ()=>{
     // setter
     s_newContainerWin.webContents.send('async_newContainer_set', x_imageid, x_tag);
+    s_mainWin.webContents.send('async_to_main_refreshContainer');
     console.log('newContainer win is ready!')
   })
 })
