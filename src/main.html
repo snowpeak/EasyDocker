@@ -37,10 +37,10 @@
         <!-- 4個分のタブ -->
         <ul class="nav nav-tabs">
             <li class="nav-item">
-                <a href="#containerTab" class="nav-link active" data-toggle="tab">コンテナ管理</a>
+                <a id="vavContainer" href="#containerTab" class="nav-link active" data-toggle="tab">コンテナ管理</a>
             </li>
             <li class="nav-item">
-                <a href="#imageTab" class="nav-link" data-toggle="tab">イメージ管理</a>
+                <a id="navImage" href="#imageTab" class="nav-link" data-toggle="tab">イメージ管理</a>
             </li>
             <li class="nav-item">
                 <a href="#settingTab" class="nav-link" data-toggle="tab">Docker設定</a>
@@ -221,11 +221,18 @@
         const dockerAPI = require('./dockerAPI');
 
         ipcRenderer.on('async_to_main_refreshContainer', () => {
-            initContainerTab()
+            console.log('called async_to_main_refreshContainer');
+            var p_atag = $('#vavContainer');
+            if(p_atag.hasClass('active')){
+                initContainerTab()
+            }else{
+                p_atag.tab('show');
+            }
         })
 
        ipcRenderer.on('async_to_main_refreshImage', () => {
-            initImageTab()
+           $('#vavImage').tab('show');
+           //initImageTab()
        })
 
        var vueContainerTab = new Vue({

@@ -77,13 +77,12 @@ exports.initDB = initDB = function(){
  * 実行部本体
  * @returns なし(返せない)
  */
-exports.insert = function insert(x_id, x_image, x_port, x_memo){
+exports.insert = function insert(x_id, x_image, x_port, x_memo, x_callback){
     let db = getConnection();
 
     let dt = new Date();
     let time = dt.getFullYear() + "-" + (dt.getMonth()+1) + "-" + dt.getDate()
     time += " " + dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds()
-    console.log(time);
     value = {
             '$id'         : x_id,
             '$image'      : x_image,
@@ -94,13 +93,11 @@ exports.insert = function insert(x_id, x_image, x_port, x_memo){
     db.run('INSERT INTO container (v_id, v_image, v_port, v_memo, d_createdate) VALUES($id, $image, $port, $memo, $createdate)',
            value, 
            function (err){
-                if( err != null){
-                    console.log(err);
-                }
+                x_callback(err);
             })
 }
 
-exports.updateMemo = function updateMemo(x_id, x_memo){
+exports.updateMemo = function updateMemo(x_id, x_memo, x_callback){
     let db = getConnection();
 
     value = {
@@ -110,9 +107,7 @@ exports.updateMemo = function updateMemo(x_id, x_memo){
     db.run('UPDATE container SET v_memo=$memo WHERE v_id=$id',
            value, 
            function (err){
-                if( err != null){
-                    console.log(err);
-                }
+                x_callback(err);
             })
 }
 

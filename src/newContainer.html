@@ -156,8 +156,7 @@
             <div class="form-group row">
                 <label for="hostname" class="col-sm-4 col-form-label">メモ</label>
                 <div class="col-sm-8">
-                    <input type="text" class="form-control" 
-                        id="memo"  v-model="memo"/>
+                    <textarea rows="5" cols="60" class="form-control" id="memo" v-model="memo"></textarea>
                 </div>
             </div>
 
@@ -268,9 +267,10 @@
                             //console.log("image=" + insertImageName );
                             //console.log("portStr=" + insertPortStr);
                             //console.log("memo=" + insertMemo);
-                            sqlite.insert(x_id, insertImageName, insertPortStr, insertMemo)
-                            
-                            window.close();
+                            sqlite.insert(x_id, insertImageName, insertPortStr, insertMemo, ()=>{
+                                ipcRenderer.send('async_main_refreshContainer');
+                                window.close();
+                            })
                         }
                     }
                     dockerAPI.createContainer(postData, true, thisCallback);

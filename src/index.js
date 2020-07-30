@@ -1,4 +1,4 @@
-const s_debug = true
+const s_debug = false
 
 const {app, Menu, BrowserWindow} = require('electron');
 const sql = require('./libsrc/sqlite.js');
@@ -78,6 +78,14 @@ const dockerAPI = require("./dockerAPI")
 var count = 1;
 
 /**
+ * メイン画面をリロードしてコンテナ一覧を更新表示する。
+ */
+ipcMain.on('async_main_refreshContainer', function(x_event){
+    console.log('async_main_refreshContainer');
+    s_mainWin.webContents.send('async_to_main_refreshContainer');
+})
+
+/**
  * container --(export)--> Image ポップアップ表示
  */
 ipcMain.on('async_main_exportContainer', function(x_event, x_id, x_tag){
@@ -128,12 +136,16 @@ ipcMain.on('async_main_editContainerMemo', function(x_event, x_id){
 ipcMain.on('async_editContainerMemo_save', function(x_event, x_id, x_memo){
     sql.getContainer(x_id, (x_container)=>{
         if(x_container ==  null){
-            sql.insert(x_id, null, null, x_memo);
+            sql.insert(x_id, null, null, x_memo, (err)=>{
+                s_editContainerWin.close();
+                s_mainWin.webContents.send('async_to_main_refreshContainer');
+            });
         } else {
-            sql.updateMemo(x_id, x_memo);
+            sql.updateMemo(x_id, x_memo, (err)=>{
+                s_editContainerWin.close();
+                s_mainWin.webContents.send('async_to_main_refreshContainer');
+            });
         }
-        s_editContainerWin.close();
-        s_mainWin.webContents.send('async_to_main_refreshContainer');
     });
 })
 
@@ -168,13 +180,12 @@ ipcMain.on('async_loadImage_load', function(x_event, x_filepath, x_repo, x_tag){
  */
 ipcMain.on('async_main_newContainer', function(x_event, x_imageid, x_tag){
   var path = `file://${__dirname}/newContainer.html`
-  s_newContainerWin = createWindow(path, 600, 650, s_debug);
+  s_newContainerWin = createWindow(path, 750, 800, s_debug);
 
   s_newContainerWin.webContents.on('did-finish-load', ()=>{
     // setter
     s_newContainerWin.webContents.send('async_newContainer_set', x_imageid, x_tag);
-    s_mainWin.webContents.send('async_to_main_refreshContainer');
-    console.log('newContainer win is ready!')
+    //s_mainWin.webContents.send('async_to_main_refreshContainer');
   })
 })
 
