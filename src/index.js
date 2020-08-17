@@ -90,7 +90,7 @@ ipcMain.on('async_main_refreshContainer', function(x_event){
  */
 ipcMain.on('async_main_exportContainer', function(x_event, x_id, x_tag){
   var path = `file://${__dirname}/exportContainer.html`
-  s_exportContainerWin = createWindow(path, 600, 650, s_debug);
+  s_exportContainerWin = createWindow(path, 800, 400, s_debug);
   s_exportContainerWin.webContents.on('did-finish-load', ()=>{
       // setter
       s_exportContainerWin.webContents.send('async_exportContainer_set', x_id, x_tag);
@@ -155,7 +155,7 @@ ipcMain.on('async_editContainerMemo_save', function(x_event, x_id, x_memo){
  */
 ipcMain.on('async_main_loadImage', function(x_event){
     var path = `file://${__dirname}/loadImage.html`
-    s_loadImageWin = createWindow(path, 600, 650, s_debug);
+    s_loadImageWin = createWindow(path, 600, 400, s_debug);
 })
 
 
@@ -170,6 +170,7 @@ ipcMain.on('async_loadImage_load', function(x_event, x_filepath, x_repo, x_tag){
         }else{
             console.log('importImage error :' + x_errMsg);
             x_event.sender.send('async_loadImage_load_res', x_errMsg);
+            
         }
     });
 })

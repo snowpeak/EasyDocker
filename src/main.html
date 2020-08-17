@@ -231,8 +231,12 @@
         })
 
        ipcRenderer.on('async_to_main_refreshImage', () => {
-           $('#vavImage').tab('show');
-           //initImageTab()
+           var p_atag = $('#navImage');
+           if(p_atag.hasClass('active')){
+               initImageTab()
+           }else{
+               p_atag.tab('show');
+           }
        })
 
        var vueContainerTab = new Vue({

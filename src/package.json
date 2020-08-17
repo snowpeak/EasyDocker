@@ -1,6 +1,6 @@
 {
   "name": "easydocker",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Docker GUI for beginners",
   "main": "index.js",
   "scripts": {
