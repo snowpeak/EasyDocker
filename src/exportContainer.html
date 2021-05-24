@@ -30,25 +30,25 @@
 
 <body>
     <div class="container">
-        <div class="row bs-callout bs-callout-info">
-            <h4 id="dealing-with-specificity">Docker Containerを Imageとして保存します</h4>
-        </div>
         <div id="app">
+             <div class="row bs-callout bs-callout-info">
+            <h4 id="dealing-with-specificity">{{$t("exportContainer.title")}}</h4>
+        </div>
             <form>
                 <div class="form-group row">
                     <label for="filepath"
-                        class="col-sm-4 col-form-label">出力先ファイル</label>
+                        class="col-sm-4 col-form-label">{{$t("exportContainer.filepath")}}</label>
                     <div class="col-sm-6">
                         <input type="text" class="form-control" id="filepath" v-model="filepath" />
                     </div>
                     <div class="col-sm-2">
                         <button type="button" class="btn btn-success"
-                            @click="app.saveFile()">選択</button>
+                            @click="app.saveFile()">{{$t("common.select")}}</button>
                     </div>
                 </div>
                 <div class="form-group row">
                     <label for="image_tag"
-                        class="col-sm-4 col-form-label">ラベル</label>
+                        class="col-sm-4 col-form-label">{{$t("exportContainer.label")}}</label>
                     <div class="col-sm-6">
                         <input type="text" class="form-control-plaintext" id="tag" v-model="tag" />
                     </div>
@@ -60,10 +60,10 @@
                     <div class="col-sm-auto">
                         <button type="button" class="btn btn-success"  @click="doSubmit()">
                           <span id="spinner" class="spinner-border spinner-border-sm" role="status" style="display:none"></span>
-                          <span>作成</span>
+                          <span>{{$t("common.create")}}</span>
                          </button>
                         <button type="button" class="btn btn-light"
-                            @click="window.close()">キャンセル</button>
+                            @click="window.close()">{{$t("common.cancel")}}</button>
                     </div>
                     <div class="col-sm-2"></div>
                 </div>
@@ -82,7 +82,17 @@
         const dockerAPI = require('./dockerAPI');
         const exportContainerAPI = require('./exportContainer');
         const { ipcRenderer } = require('electron');
+        const vuei18n = require('vue-i18n');
+        Vue.use(vuei18n);
+        const i18n = new vuei18n({
+            locale : 'ja',
+            messages : {
+                ja : require('./messages_ja.json'),
+                en : require('./messages_en.json')
+            }
+        })
         var app = new Vue({
+            i18n : i18n, 
             el: '#app',
             data: {
                 filepath: "",
@@ -92,20 +102,21 @@
                 running: false,
             },
             methods: {
-                doInit: function (x_id, x_tag) {
+                doInit: function (x_id, x_tag, x_locale) {
                     this.id = x_id
                     this.tag = x_tag
+                    i18n.locale = x_locale
                 },
                 saveFile: function () {
                     exportContainerAPI.saveFile((x_path)=>{this.filepath = x_path})
                 },
                 doSubmit: function () {
                     if(this.running){
-                        alert("処理中です")
+                        alert(this.$t('common.inprogress'))
                         return
                     }
                     if(this.filepath.trim().length ==0 ){
-                        this.msg="出力ファイルを指定してください"
+                        this.msg=this.$t('exportContainer.specifyFilepath')
                             $('#alertMsg').css("display", "");
                         return
                     }
@@ -118,9 +129,9 @@
         })
 
         // メインプロセスからの通信受け取り
-        ipcRenderer.on('async_exportContainer_set', function (event, x_id, x_tag) {
+        ipcRenderer.on('async_exportContainer_set', function (event, x_id, x_tag, x_locale) {
             console.log(x_id + ":" + x_tag);
-            app.doInit(x_id, x_tag)
+            app.doInit(x_id, x_tag, x_locale)
         })
         
         // メインプロセスからの通信受け取り
