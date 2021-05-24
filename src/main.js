@@ -1,6 +1,15 @@
 window.onload = function(){
     this.initPage() //タブにイベントを設定する
 
+
+//settingTab
+    let sql = require('./libsrc/sqlite.js');
+    sql.getParam(function(param){
+        settingTab._i18n.locale = param.value;
+        settingTab.lang = param.value;
+    }, 'lang');
+
+
     this.initContainerTab()　//コンテナ一覧表示
     //this.initImageTab()     //イメージ一覧表示
     
@@ -43,6 +52,7 @@ function initContainerTab(){
             })
 
             var container = {
+                "name" : x_container.name,
                 "id": x_container.id,
                 "image": x_container.image,
                 "state": x_container.state,
