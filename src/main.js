@@ -22,7 +22,6 @@ function initPage() {
         if(idx>0){
             activatedTab = activatedTab.substring(idx+1)
         }
-        
         //var previous_tab = e.relatedTarget // previous tab( full URL+#tabname )
 
         // 処理
@@ -31,6 +30,8 @@ function initPage() {
             initContainerTab()
         }else if( activatedTab == "imageTab"){
             initImageTab()
+        } else if (activatedTab == 'networkTab') {
+            initNetworkTab();
         }
     })
 }
@@ -112,4 +113,14 @@ function initImageTab(){
     }
     docker.getImages(callbackImages);
 
+}
+/**
+ * Update contents on Network tab.
+ */
+function initNetworkTab() {
+    var docker = require('./dockerAPI');
+    var CallbackNetwork = function(x_networks) {
+        networkTab.setNetworks(x_networks);   
+    }
+    docker.getNetworks(CallbackNetwork);
 }
