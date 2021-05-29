@@ -35,18 +35,24 @@
 <body>
     <main class="p-3">
         <div id="mainTabs">
-        <!-- 4個分のタブ -->
-        <ul class="nav nav-tabs">
-            <li class="nav-item">
-                <a id="vavContainer" href="#containerTab" class="nav-link active" data-toggle="tab">{{$t("maintabs.containerAdministration")}}</a>
-            </li>
-            <li class="nav-item">
-                <a id="navImage" href="#imageTab" class="nav-link" data-toggle="tab">{{$t("maintabs.imageAdministration")}}</a>
-            </li>
-            <li class="nav-item">
-                <a href="#settingTab" class="nav-link" data-toggle="tab">{{$t("maintabs.dockerConfig")}}</a>
-            </li>
-        </ul>
+            <!-- 4個分のタブ -->
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a id="vavContainer" href="#containerTab" class="nav-link active"
+                        data-toggle="tab">{{$t("maintabs.containerAdministration")}}</a>
+                </li>
+                <li class="nav-item">
+                    <a id="navImage" href="#imageTab" class="nav-link"
+                        data-toggle="tab">{{$t("maintabs.imageAdministration")}}</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#settingTab" class="nav-link" data-toggle="tab">{{$t("maintabs.dockerConfig")}}</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#networkTab" class="nav-link"
+                        data-toggle="tab">{{$t("maintabs.networkAdministration")}}</a>
+                </li>
+            </ul>
         </div>
         <!-- タブコンテンツ -->
         <div class="tab-content">
@@ -66,18 +72,20 @@
                             <th>{{$t("containertab.delete")}}</th>
                             <!-- >th>ID</th -->
                         </tr>
-                         <tr v-for="container in containers">
+                        <tr v-for="container in containers">
                             <td>{{container.name}}</td>
                             <td>{{container.image}}</td>
                             <td>{{container.state}}
-                                <span  v-if="container.state != 'running'">
+                                <span v-if="container.state != 'running'">
                                     <button type="button" class="btn btn-primary"
                                         @click="startContainer(container.id)">{{$t("containertab.startcontainer")}}</button>
                                 </span>
-                                <span  v-else>
-                                    <button type="button" class="btn btn-warning"  @click="stopContainer($event, container.id)">
-                                        <span class="spinner-border spinner-border-sm" role="status" style="display:none"></span>
-                                                                                                停止
+                                <span v-else>
+                                    <button type="button" class="btn btn-warning"
+                                        @click="stopContainer($event, container.id)">
+                                        <span class="spinner-border spinner-border-sm" role="status"
+                                            style="display:none"></span>
+                                        停止
                                     </button>
                                 </span>
                             </td>
@@ -91,20 +99,25 @@
                                     @click="exportContainer(container.id, container.image)">{{$t("common.save")}}</button>
                             </td>
                             <td v-html="container.port"></td>
-                            <td><pre style="margin-bottom:0" v-html="container.memo"></pre>
-                                <BR><a　style="color:blue;text-decoration:underline;font-style:oblique;cursor:pointer" @click="editContainerMemo(container.id)">{{$t("common.edit.en")}}</a></td>
                             <td>
-                                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteConfirm" 
+                                <pre style="margin-bottom:0" v-html="container.memo"></pre>
+                                <BR><a　style="color:blue;text-decoration:underline;font-style:oblique;cursor:pointer"
+                                    @click="editContainerMemo(container.id)">{{$t("common.edit.en")}}</a>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger" data-toggle="modal"
+                                    data-target="#deleteConfirm"
                                     @click="setModalValue(container.image, container.state, container.id)">{{$t("common.delete")}}</button>
-                            </tr>
-                            <!--  td>{{container.id}}</td -->
+                        </tr>
+                        <!--  td>{{container.id}}</td -->
                         </th>
                     </tbody>
                 </table>
             </div>
             <div id="imageTab" class="tab-pane">
                 <div class="mt-2 mb-2">
-                    <button type="button" class="btn btn-primary" @click="loadImage()">{{$t("imagetab.addimage")}}</button>
+                    <button type="button" class="btn btn-primary"
+                        @click="loadImage()">{{$t("imagetab.addimage")}}</button>
                 </div>
                 <h1>{{$t("imagetab.imagelist")}}</h1>
                 <div v-if="!init">{{$t("imagetab.initprogress")}}</div>
@@ -117,18 +130,50 @@
                             <th>{{$t("imagetab.size")}}</th>
                             <th>{{$t("imagetab.id")}}</th>
                         </tr>
-                         <tr v-for="image in images">
+                        <tr v-for="image in images">
                             <td>{{image.tag}}</td>
                             <td>
-                                <button class="btn btn-primary" @click="vueImageTab.newContainer(image.id, image.tag)">{{$t("common.start")}}</button>
-                                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteImageConfirm" 
+                                <button class="btn btn-primary"
+                                    @click="vueImageTab.newContainer(image.id, image.tag)">{{$t("common.start")}}</button>
+                                <button type="button" class="btn btn-danger" data-toggle="modal"
+                                    data-target="#deleteImageConfirm"
                                     @click="vueImageTab.deleteImage(image.id, image.tag)">{{$t("common.delete")}}</button>
                             </td>
                             <td>{{image.size}}</td>
                             <td>{{image.id}}</td>
-                        </th>
+                            </th>
                     </tbody>
                 </table>
+            </div>
+            <!-- Network tab area -->
+            <div id="networkTab" class="tab-pane">
+                <div class="container-fluid p-3">
+                    <div class="row">
+                        <div class="col-7">
+                            <table v-if="networkDetail.length > 0" class="table table-bordered" width="70%">
+                                <thead>
+                                    <tr>
+                                        <th>{{$t("networkTab.name")}}</th>
+                                        <th>{{$t("networkTab.containers")}}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="network in networkDetail">
+                                        <td>{{network.name}}</td>
+                                        <td>
+                                            <span v-for="container in network.containers">
+                                                * {{container}}
+                                            </span>
+                                            <!-- <li v-for="container in network.containers">
+                                        {{container}}
+                                    </li> -->
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div id="settingTab" class="tab-pane">
                 <h1>Dokcer設定: 工事中</h1>
@@ -137,7 +182,7 @@
                     <option>--</option>
                     <option>ja</option>
                     <option>en</option>
-                  </select>
+                </select>
                 <ul>
                     <li>DokerAPIのURL(現在は localhost:2375 固定)</li>
                     <li>Dokerイメージをロードするときの初期ディレクトリ</li>
@@ -146,48 +191,40 @@
             </div>
         </div>
     </main>
-    <div class="modal fade" id="deleteConfirm" tabindex="-1"
-        role="dialog" aria-labelledby="exampleModalLabel"
+    <div class="modal fade" id="deleteConfirm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">{{$t("deleteconform.confirmation")}}</h5>
-                    
+
                     <!--  右上の×ボタン -->
-                    <button type="button" class="close"
-                        data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                
+
                 <div class="modal-body">
                     <form>
                         <div class="form-group row">
                             <label for="delImage" class="col-sm-2 col-form-label">{{$t("deleteconform.image")}}</label>
                             <div class="col-sm-10">
-                                <input type="text" readonly
-                                    class="form-control-plaintext"
-                                    id="delImage"
+                                <input type="text" readonly class="form-control-plaintext" id="delImage"
                                     v-model="image">
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label for="delStatus" class="col-sm-2 col-form-label">{{$t("deleteconform.status")}}</label>
+                            <label for="delStatus"
+                                class="col-sm-2 col-form-label">{{$t("deleteconform.status")}}</label>
                             <div class="col-sm-10">
-                                <input type="text" readonly
-                                    class="form-control-plaintext"
-                                    id="delStatus"
+                                <input type="text" readonly class="form-control-plaintext" id="delStatus"
                                     v-model="state">
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="delId" class="col-sm-2 col-form-label">{{$t("deleteconform.id")}}</label>
                             <div class="col-sm-10">
-                                <input type="text" readonly
-                                    class="form-control-plaintext"
-                                    id="delID"
-                                    v-model="id">
+                                <input type="text" readonly class="form-control-plaintext" id="delID" v-model="id">
                             </div>
                         </div>
                     </form>
@@ -196,7 +233,8 @@
                     <button type="button" class="btn btn-secondary"
                         data-dismiss="modal">{{$t("common.cancel")}}</button>
                     <button type="button" class="btn btn-danger" @click="doDelete()">
-                        <span id="spinner" class="spinner-border spinner-border-sm" role="status" style="display:none"></span>
+                        <span id="spinner" class="spinner-border spinner-border-sm" role="status"
+                            style="display:none"></span>
                         <span>{{$t("common.exec")}}</span>
                     </button>
                 </div>
@@ -204,15 +242,14 @@
         </div>
     </div>
 
-    <div class="modal fade" id="deleteImageConfirm" tabindex="-1" role="dialog" >
+    <div class="modal fade" id="deleteImageConfirm" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 id="deleteImageConfirmText" class="modal-title" ></h5>
-                    
+                    <h5 id="deleteImageConfirmText" class="modal-title"></h5>
+
                     <!--  右上の×ボタン -->
-                    <button type="button" class="close"
-                        data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -224,46 +261,46 @@
             </div>
         </div>
     </div>
-    
+
     <script>
-        const {ipcRenderer} = require('electron');
+        const { ipcRenderer } = require('electron');
         const dockerAPI = require('./dockerAPI');
         const vuei18n = require('vue-i18n');
         const sql = require('./libsrc/sqlite.js');
         Vue.use(vuei18n);
         const i18n = new vuei18n({
-            locale : 'ja',
-            messages : {
-                ja : require('./messages_ja.json'),
-                en : require('./messages_en.json')
+            locale: 'ja',
+            messages: {
+                ja: require('./messages_ja.json'),
+                en: require('./messages_en.json')
             }
         })
 
         ipcRenderer.on('async_to_main_refreshContainer', () => {
             console.log('called async_to_main_refreshContainer');
             var p_atag = $('#vavContainer');
-            if(p_atag.hasClass('active')){
+            if (p_atag.hasClass('active')) {
                 initContainerTab()
-            }else{
+            } else {
                 p_atag.tab('show');
             }
         })
 
-       ipcRenderer.on('async_to_main_refreshImage', () => {
-           var p_atag = $('#navImage');
-           if(p_atag.hasClass('active')){
-               initImageTab()
-           }else{
-               p_atag.tab('show');
-           }
-       })
+        ipcRenderer.on('async_to_main_refreshImage', () => {
+            var p_atag = $('#navImage');
+            if (p_atag.hasClass('active')) {
+                initImageTab()
+            } else {
+                p_atag.tab('show');
+            }
+        })
 
-       var vueContainerTab = new Vue({
-            i18n : i18n,    
-            el : '#containerTab',
+        var vueContainerTab = new Vue({
+            i18n: i18n,
+            el: '#containerTab',
             data: {
-                init : false,
-                containers : [], // {id:"", tag:"", size:byte数} の配列}
+                init: false,
+                containers: [], // {id:"", tag:"", size:byte数} の配列}
                 stopping: false,
             },
             methods: {
@@ -271,76 +308,76 @@
                     this.init = true
                     this.containers = x_containers
                 },
-                startContainer: function( x_id ){
-                    dockerAPI.startContainer(x_id, (x_err)=>{
-                        if(x_err != null){
-                            alert( x_err );
+                startContainer: function (x_id) {
+                    dockerAPI.startContainer(x_id, (x_err) => {
+                        if (x_err != null) {
+                            alert(x_err);
                         }
                         initContainerTab()
                     })
                 },
-                stopContainer: function( x_event, x_id ){
-                    if(x_event.target.tagName != 'BUTTON'){
+                stopContainer: function (x_event, x_id) {
+                    if (x_event.target.tagName != 'BUTTON') {
                         return;
                     }
-                    
-                    if(this.stopping){
+
+                    if (this.stopping) {
                         alert('停止作業中です')
                     }
-                    
+
                     this.stopping = true;
 
                     let spinner = x_event.target.children[0]
                     spinner.style.display = ""
-                
-                    dockerAPI.stopContainer(x_id, (x_err)=>{
-                        if(x_err != null){
-                            alert( x_err );
+
+                    dockerAPI.stopContainer(x_id, (x_err) => {
+                        if (x_err != null) {
+                            alert(x_err);
                         }
                         this.stopping = false;
                         spinner.style.display = "none"
                         initContainerTab()
                     })
                 },
-                runConsole: function( x_id ){
+                runConsole: function (x_id) {
                     const { spawn } = require('child_process');
                     //docker exec -it イメージID /bin/bash
                     const args = ["", "docker", "exec", "-it", x_id, "/bin/bash"]
                     const child = spawn("start", args, { shell: true, stdio: "ignore" })
                     child.unref(); // メインプロセスから切り離す
                 },
-                exportContainer: function(x_id, x_tag){
+                exportContainer: function (x_id, x_tag) {
                     ipcRenderer.send('async_main_exportContainer', x_id, x_tag, i18n.locale);
                 },
-                editContainerMemo: function(x_id){
+                editContainerMemo: function (x_id) {
                     ipcRenderer.send('async_main_editContainerMemo', x_id);
                 },
-                setModalValue: function( x_image, x_state, x_id ){
-                    deleteConfirm.setValue( x_image, x_state, x_id )
+                setModalValue: function (x_image, x_state, x_id) {
+                    deleteConfirm.setValue(x_image, x_state, x_id)
                 }
             }
         })
         var vueImageTab = new Vue({
-            i18n : i18n, 
-            el : '#imageTab',
+            i18n: i18n,
+            el: '#imageTab',
             data: {
-                init : false,
-                images : [],
+                init: false,
+                images: [],
             },
             methods: {
                 setImages: function (x_images) {
                     this.init = true
                     this.images = x_images
                 },
-                loadImage: function(){
+                loadImage: function () {
                     ipcRenderer.send('async_main_loadImage', i18n.locale);
                 },
-                newContainer: function(x_imageid, x_tag){
+                newContainer: function (x_imageid, x_tag) {
                     var localelang = i18n.locale;
                     console.log(i18n.localelang);
                     ipcRenderer.send('async_main_newContainer', x_imageid, x_tag, localelang);
                 },
-                deleteImage: function(x_imageid, x_tag){
+                deleteImage: function (x_imageid, x_tag) {
                     deleteImageConfirm.setId(x_imageid);
                     $('#deleteImageConfirmText').html(x_tag + this.$t('imagetab.confirm'))
                     //ipcRenderer.send('async_main_deleteImage', x_imageid, x_tag);
@@ -348,12 +385,12 @@
             }
         })
         var deleteConfirm = new Vue({
-            i18n : i18n, 
-            el : '#deleteConfirm',
+            i18n: i18n,
+            el: '#deleteConfirm',
             data: {
-                image : "",
-                state : "",
-                id : "",
+                image: "",
+                state: "",
+                id: "",
             },
             methods: {
                 setValue: function (x_image, x_state, x_id) {
@@ -364,9 +401,9 @@
                 doDelete: function () {
                     let containerID = this.id
                     $('#spinner').css("display", "")
-                    dockerAPI.stopContainer(this.id, function(x_err){
-                        dockerAPI.deleteContainer(containerID, function(x_err){
-                            if( x_err != null){
+                    dockerAPI.stopContainer(this.id, function (x_err) {
+                        dockerAPI.deleteContainer(containerID, function (x_err) {
+                            if (x_err != null) {
                                 alert(x_err)
                             }
                             $('#spinner').css("display", "none")
@@ -378,18 +415,18 @@
             }
         })
         var deleteImageConfirm = new Vue({
-            i18n : i18n, 
-            el : '#deleteImageConfirm',
+            i18n: i18n,
+            el: '#deleteImageConfirm',
             data: {
-                id : "",
+                id: "",
             },
             methods: {
-                setId: function(x_id){
+                setId: function (x_id) {
                     this.id = x_id
                 },
                 doDelete: function () {
-                    dockerAPI.deleteImage(this.id, function(x_errMsg){
-                        if(x_errMsg != null){
+                    dockerAPI.deleteImage(this.id, function (x_errMsg) {
+                        if (x_errMsg != null) {
                             alert(x_errMsg)
                         }
                         $('#deleteImageConfirm').modal('hide') // hide modal
@@ -399,24 +436,47 @@
             }
         })
         var mainTabs = new Vue({
-            i18n : i18n, 
-            el : '#mainTabs',
+            i18n: i18n,
+            el: '#mainTabs',
         })
         var settingTab = new Vue({
-            i18n : i18n,
-            el : '#settingTab',
-            data : {
-                lang : 'ja'
+            i18n: i18n,
+            el: '#settingTab',
+            data: {
+                lang: 'ja'
             },
-            methods:{
-                updateLang : function() {
+            methods: {
+                updateLang: function () {
                     i18n.locale = this.lang;
                     console.log(i18n.locale);
-                    sql.updateParam('lang', this.lang, function(err){console.log(err);});
+                    sql.updateParam('lang', this.lang, function (err) { console.log(err); });
+                }
+            }
+        })
+        var networkTab = new Vue({
+            i18n: i18n,
+            el: '#networkTab',
+            data: {
+                networkDetail: []
+            },
+            methods: {
+                setNetworks: function (x_networks) {
+                    var tmp = [];
+                    this.networkDetail = tmp;
+                    x_networks.forEach(network => {
+                        dockerAPI.getNetwork(network.id, function (x_data) {
+                            var networkName = x_data.name;
+                            var containers = [];
+                            x_data.containers.forEach(container => {
+                                containers.push(container[1]['Name']);
+                            });
+                            tmp.push({ "name": networkName, "containers": containers });
+                            this.networkDetail = tmp;
+                        });
+                    });
                 }
             }
         })
     </script>
 </body>
-
 </html>
