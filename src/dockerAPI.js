@@ -3,7 +3,7 @@
  * @param x_callback(containers)
  * containers=[{id, state, image, ports=[port]}]
  */
-exports.getContainers = getContainers = function(x_callback){
+exports.getContainers = getContainers = function (x_callback) {
   var options = getOptions("/containers/json?all=true", "GET", "")
   var http = require('http');
   let req = http.request(options, (res) => {
@@ -20,9 +20,9 @@ exports.getContainers = getContainers = function(x_callback){
 
     res.on('end', () => {
       var containers = null
-      try{
+      try {
         containers = JSON.parse(jsonStr)
-      }catch(e){
+      } catch (e) {
         console.log("------------ getContainers() error: " + jsonStr)
         throw e
       }
@@ -31,6 +31,7 @@ exports.getContainers = getContainers = function(x_callback){
 
       containers.forEach(function (container) {
         //console.log(container)
+        var name = container['Names'][0];
         var id = container['Id'];
         var image = container['Image']
         var state = container['State']
@@ -41,12 +42,12 @@ exports.getContainers = getContainers = function(x_callback){
         */
         var ports = []
         container['Ports'].forEach(function (x_port) {
-          if(x_port.PublicPort != undefined){
+          if (x_port.PublicPort != undefined) {
             port = "localhost:" + x_port['PublicPort'] + " --> " + x_port['PrivatePort'];
             ports.push(port)
           }
         })
-        var value = { 'id': id, 'image': image, 'state': state, 'ports': ports }
+        var value = { 'name': name, 'id': id, 'image': image, 'state': state, 'ports': ports }
         retValues.push(value);
       })
 
