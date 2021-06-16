@@ -8,6 +8,7 @@ let s_exportContainerWin;
 let s_editContainerMemo;
 let s_newContainerWin;
 let s_loadImageWin;
+let s_createNetworkWin;
 
 function initApp(){
   s_mainWin = createWindow(`file://${__dirname}/main.html`, 1200, 900, s_debug);
@@ -160,8 +161,16 @@ ipcMain.on('async_main_loadImage', function(x_event, x_locale){
       s_loadImageWin.webContents.send('async_loadImage_set', x_locale);
     })
 })
-
-
+/**
+ * Display create network popup.
+ */
+ipcMain.on('async_main_createNetwork', function(x_event, x_locale){
+  var path = `file://${__dirname}/createNetwork.html`
+  s_createNetworkWin = createWindow(path, 600, 400, s_debug);
+  s_createNetworkWin.webContents.on('did-finish-load', ()=>{
+  s_createNetworkWin.webContents.send('async_createNetwork_set', x_locale);
+  })
+})
 /**
  * Imageロード 実行
  */
@@ -177,7 +186,16 @@ ipcMain.on('async_loadImage_load', function(x_event, x_filepath, x_repo, x_tag){
         }
     });
 })
-
+/**
+ * Execute network creation.
+ */
+ipcMain.on('async_createNetwork_create', function(x_event, x_name){
+  dockerAPI.createNetwork(x_name, function (){
+    s_mainWin.webContents.send('async_createNetwork_create_res');
+    s_mainWin.webContents.send('async_to_main_refreshNetwork');
+    s_createNetworkWin.close();
+  });
+})
 
 /**
  * コンテナ作成 ポップアップ表示
