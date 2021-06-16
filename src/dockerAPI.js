@@ -556,6 +556,7 @@ exports.deleteImage = function (x_id, x_callback) {
 /**
  * Get all docker network info.
  * @param {*} x_callback Callback function
+ * @author Latte Beo
  */
 exports.getNetworks = function (x_callback) {
   sendHttpRequest(getOptions("/networks", "GET", ""), function (x_data) {
@@ -570,20 +571,43 @@ exports.getNetworks = function (x_callback) {
  * Get docker network info.
  * @param {*} x_id Network ID.
  * @param {*} x_callback Callback function.
+ * @author Latte Beo
  */
 exports.getNetwork = function (x_id, x_callback) {
   sendHttpRequest(getOptions("/networks/" + x_id, "GET", ""), function (x_data) {
-    var result = { "name": x_data['Name'], "containers": Object.entries(x_data['Containers']) }
+    var result = { "id": x_id, "name": x_data['Name'], "containers": Object.entries(x_data['Containers']) }
     x_callback(result);
   });
+}
+/**
+ * Create network.
+ * @param {*} x_name Network name 
+ * @param {*} x_callback  Callback function
+ * @author Latte Beo
+ */
+exports.createNetwork = function (x_name, x_callback) {
+  var jsonstr = JSON.stringify({ "Name": x_name });
+  sendHttpRequest(getOptions("/networks/create", "POST", "application/json", jsonstr), function () {
+    x_callback(null);
+  }, jsonstr);
+}
+/**
+ * Delete network.
+ * @param {*} x_id Network ID 
+ * @param {*} x_callback Callback function
+ * @author Latte Beo
+ */
+exports.deleteNetwork = function (x_id, x_callback) {
+  sendHttpRequest(getOptions("/networks/" + x_id, "DELETE", "", ""), x_callback, null);
 }
 
 /**
  * Send Http request.
  * @param x_callback Callback function.
  * @param x_options Request options(got from getOptions method).
+ * @param x_postData Post data.
  */
-sendHttpRequest = function (x_options, x_callback) {
+sendHttpRequest = function (x_options, x_callback, x_postData) {
   var http = require("http");
   let req = http.request(x_options, (res) => {
     res.setEncoding('utf8');
@@ -604,6 +628,9 @@ sendHttpRequest = function (x_options, x_callback) {
   req.on('error', (e) => {
     console.log("error!");
   });
+  if (x_postData != null) {
+    req.write(x_postData);
+  }
   req.end();
 }
 
