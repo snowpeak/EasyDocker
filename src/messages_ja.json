@@ -66,5 +66,9 @@
     "newContainer.portForwarding":"ポート転送",
 
     "networkTab.name" : "ネットワーク名",
-    "networkTab.containers":"接続されているコンテナ"
+    "networkTab.containers":"接続されているコンテナ",
+    "networkTab.createNetwork":"ネットワーク追加",
+
+    "createNetwork.title":"ネットワーク作成",
+    "createNetwork.name":"ネットワーク名"
 }

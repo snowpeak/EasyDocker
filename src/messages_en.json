@@ -66,5 +66,9 @@
     "newContainer.portForwarding":"Port forwardings",
 
     "networkTab.name" : "Network name",
-    "networkTab.containers":"Connected containers"
+    "networkTab.containers":"Connected containers",
+    "networkTab.createNetwork":"Add network",
+
+    "createNetwork.title":"Network creation",
+    "createNetwork.name":"Network name"
 }
