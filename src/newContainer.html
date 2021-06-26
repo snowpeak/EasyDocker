@@ -162,6 +162,75 @@
             </div>
 
             <div class="form-group row">
+                <!-- Environment variable 1 -->
+                <span class="col-sm-4">
+                    <label for="envvar01name" class="col-form-label">{{$t("newContainer.envvar")}}</label>
+                </span>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" 
+                        id="envvar01name"  v-model="envvar01name"/>
+                </div>
+                <label col-sm-1->=</label>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" 
+                        id="envvar01value"  v-model="envvar01value"/>
+                </div>
+                <!-- Environment variable 2 -->
+                <span class="col-sm-4">
+                    <label for="envvar01name" class="col-form-label"></label>
+                </span>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" 
+                        id="envvar02name"  v-model="envvar02name"/>
+                </div>
+                <label col-sm-1->=</label>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" 
+                        id="envvar02value"  v-model="envvar02value"/>
+                </div>
+                <!-- Environment variable 3 -->
+                <span class="col-sm-4">
+                    <label for="envvar01name" class="col-form-label"></label>
+                </span>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" 
+                        id="envvar03name"  v-model="envvar03name"/>
+                </div>
+                <label col-sm-1->=</label>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" 
+                        id="envvar03value"  v-model="envvar03value"/>
+                </div>            
+                 <!-- Environment variable 4 -->
+                 <span class="col-sm-4">
+                    <label for="envvar01name" class="col-form-label"></label>
+                </span>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" 
+                        id="envvar04name"  v-model="envvar04name"/>
+                </div>
+                <label col-sm-1->=</label>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" 
+                        id="envvar04value"  v-model="envvar04value"/>
+                </div>                
+                 <!-- Environment variable 5 -->
+                 <span class="col-sm-4">
+                    <label for="envvar01name" class="col-form-label"></label>
+                </span>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" 
+                        id="envvar05name"  v-model="envvar05name"/>
+                </div>
+                <label col-sm-1->=</label>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" 
+                        id="envvar05value"  v-model="envvar05value"/>
+                </div>
+            </div>
+
+
+            <div class="form-group row">
                 <label for="hostname" class="col-sm-4 col-form-label">メモ</label>
                 <div class="col-sm-8">
                     <textarea rows="5" cols="60" class="form-control" id="memo" v-model="memo"></textarea>
@@ -212,6 +281,16 @@
                 port02type: "tcp",   port02from: "22",     port02to: "22",
                 port03type: "--",   port03from: "",       port03to: "",
                 port04type: "--",   port04from: "",       port04to: "",
+                envvar01name : "", envvar01value : "",
+                envvar02name : "", envvar02value : "",
+                envvar03name : "", envvar03value : "",
+                envvar04name : "", envvar04value : "",
+                envvar05name : "", envvar05value : "",
+                envvar06name : "", envvar06value : "",
+                envvar07name : "", envvar07value : "",
+                envvar08name : "", envvar08value : "",
+                envvar09name : "", envvar09value : "",
+                envvar10name : "", envvar10value : "",
                 memo: "",
                 running : false,
             },
@@ -250,7 +329,23 @@
                 			      },
                 			    }
                 			  };
-                	  
+
+                    var envarArray = [
+                        [this.envvar01name, this.envvar01value],
+                        [this.envvar02name, this.envvar02value],
+                        [this.envvar03name, this.envvar03value],
+                        [this.envvar04name, this.envvar04value],
+                        [this.envvar05name, this.envvar05value],                       
+                    ];
+                    var envvarSetting = [];
+                    for (i=0; i < envarArray.length; i++) {
+                        if (envarArray[i][0] && envarArray[i][1]) {
+                            envvarSetting.push(envarArray[i][0] + "=" + envarArray[i][1]);
+                        }
+                    }
+                    if (envvarSetting.length != 0) {
+                        postData['Env'] = envvarSetting;
+                    }
                 	var portsArray = [
                 	    [this.port01type, this.port01from, this.port01to],
                 	    [this.port02type, this.port02from, this.port02to],

@@ -64,6 +64,7 @@
     "newContainer.command":"Commands to run",
     "newContainer.hostname":"Host name",
     "newContainer.portForwarding":"Port forwardings",
+    "newContainer.envvar":"Environment variable",
 
     "networkTab.name" : "Network name",
     "networkTab.containers":"Connected containers",

@@ -64,6 +64,7 @@
     "newContainer.command":"起動時実行コマンド",
     "newContainer.hostname":"ホスト名",
     "newContainer.portForwarding":"ポート転送",
+    "newContainer.envvar":"環境変数",
 
     "networkTab.name" : "ネットワーク名",
     "networkTab.containers":"接続されているコンテナ",
