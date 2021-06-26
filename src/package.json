@@ -18,7 +18,8 @@
   "homepage": "https://github.com/snowpeak/EasyDocker#readme",
   "dependencies": {
     "!electron": "^8.2.5",
-    "sqlite3": "^5.0.0"
+    "sqlite3": "^5.0.0",
+    "vue-i18n": "^8.24.4"
   },
   "devDependencies": {
     "electron": "^9.1.0",

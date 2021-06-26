@@ -30,10 +30,10 @@
 
 <body>
     <div class="container">
-        <div class="row bs-callout bs-callout-info">
-            <h4 id="dealing-with-specificity">コンテナ メモ編集</h4>
-        </div>
-        <div id="app">
+            <div id="app">
+            <div class="row bs-callout bs-callout-info">
+                <h4 id="dealing-with-specificity">{{$t("editContainerMemo.title")}}</h4>
+            </div>
             <form>
                 <div class="form-group row">
                     <!-- 
@@ -53,10 +53,10 @@
                     <div class="col-sm-auto">
                         <button type="button" class="btn btn-success"  @click="doSubmit()">
                           <span id="spinner" class="spinner-border spinner-border-sm" role="status" style="display:none"></span>
-                          <span>保存</span>
+                          <span>{{$t("common.save")}}</span>
                          </button>
                         <button type="button" class="btn btn-light"
-                            @click="window.close()">キャンセル</button>
+                            @click="window.close()">{{$t("common.cancel")}}</button>
                     </div>
                     <div class="col-sm-2"></div>
                 </div>
@@ -73,7 +73,17 @@
 
     <script>
         const { ipcRenderer } = require('electron');
+        const vuei18n = require('vue-i18n');
+        Vue.use(vuei18n);
+        const i18n = new vuei18n({
+            locale : 'ja',
+            messages : {
+                ja : require('./messages_ja.json'),
+                en : require('./messages_en.json')
+            }
+        })
         var app = new Vue({
+            i18n : i18n, 
             el: '#app',
             data: {
                 id: "",
@@ -81,10 +91,11 @@
                 msg: "",
             },
             methods: {
-                doInit: function (x_id, x_memo) {
+                doInit: function (x_id, x_memo, x_locale) {
                     this.id = x_id
                     this.memo = x_memo
-                    console.log(x_id + ":" + x_memo)
+                    console.log(x_id + ":" + x_memo);
+                    i18n.locale = x_locale;
                 },
                 doSubmit: function () {
                     $('#alertMsg').css("display", "none");
@@ -97,9 +108,9 @@
         })
 
         // メインプロセスからの通信受け取り
-        ipcRenderer.on('async_editContainerMemo_set', function (event, x_id, x_memo) {
+        ipcRenderer.on('async_editContainerMemo_set', function (event, x_id, x_memo, x_locale) {
             console.log(x_id + ":" + x_memo);
-            app.doInit(x_id, x_memo)
+            app.doInit(x_id, x_memo, x_locale)
         })
         
         // メインプロセスからの通信受け取り

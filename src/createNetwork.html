@@ -1,10 +1,12 @@
 <!DOCTYPE html>
+<!--
+    Easy Docker - Create network page.
+    @author Latte Beo
+-->
 <html lang="ja">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <!-- https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css -->
     <link rel="stylesheet" href="./css/bootstrap.min.css" />
     <link rel="stylesheet" href="./fontawesome/css/all.css" />
     <link rel="stylesheet" href="./css/easydocker.css" />
@@ -19,41 +21,29 @@
             module = undefined;
         }
     </script>
-  
     <!-- https://cdn.jsdelivr.net/npm/vue -->
     <script src="./js/vue.js"></script>
     
     <script>if (window.module) module = window.module;</script>
 
-    <title>Easy Docker - exportContainer</title>
+    <title>Easy Docker - Create Network</title>
 </head>
 
 <body>
     <div class="container">
         <div id="app">
-             <div class="row bs-callout bs-callout-info">
-            <h4 id="dealing-with-specificity">{{$t("exportContainer.title")}}</h4>
+            <div class="row bs-callout bs-callout-info">
+            <h4 id="dealing-with-specificity">{{$t("createNetwork.title")}}</h4>
         </div>
             <form>
                 <div class="form-group row">
-                    <label for="filepath"
-                        class="col-sm-4 col-form-label">{{$t("exportContainer.filepath")}}</label>
+                    <label for="name"
+                        class="col-sm-4 col-form-label">{{$t("createNetwork.name")}}</label>
                     <div class="col-sm-6">
-                        <input type="text" class="form-control" id="filepath" v-model="filepath" />
-                    </div>
-                    <div class="col-sm-2">
-                        <button type="button" class="btn btn-success"
-                            @click="app.saveFile()">{{$t("common.select")}}</button>
+                        <input type="text" class="form-control"
+                            id="name" v-model="name" />
                     </div>
                 </div>
-                <div class="form-group row">
-                    <label for="image_tag"
-                        class="col-sm-4 col-form-label">{{$t("exportContainer.label")}}</label>
-                    <div class="col-sm-6">
-                        <input type="text" class="form-control-plaintext" id="tag" v-model="tag" />
-                    </div>
-                </div>
-
                 <!-- button -->
                 <div class="form-group row">
                     <div class="col-sm-3"></div>
@@ -67,12 +57,6 @@
                     </div>
                     <div class="col-sm-2"></div>
                 </div>
-                <div class="form-group row">
-                    <div class="alert alert-danger col-sm-12"
-                        role="alert" data-dismiss="alert" id="alertMsg" style="display:none">
-                        <input type="text" class="form-control-plaintext" v-model="msg" />
-                        </div>
-                </div>
             </form>
         </div>
     </div>
@@ -80,7 +64,6 @@
 
     <script>
         const dockerAPI = require('./dockerAPI');
-        const exportContainerAPI = require('./exportContainer');
         const { ipcRenderer } = require('electron');
         const vuei18n = require('vue-i18n');
         Vue.use(vuei18n);
@@ -95,50 +78,35 @@
             i18n : i18n, 
             el: '#app',
             data: {
-                filepath: "",
-                id: "",
-                tag: "",
-                msg: "",
-                running: false,
+                name: "",
             },
             methods: {
-                doInit: function (x_id, x_tag, x_locale) {
-                    this.id = x_id
-                    this.tag = x_tag
-                    i18n.locale = x_locale
-                },
-                saveFile: function () {
-                    exportContainerAPI.saveFile((x_path)=>{this.filepath = x_path})
+                doInit : function(x_locale){
+                    i18n.locale = x_locale;
                 },
                 doSubmit: function () {
                     if(this.running){
                         alert(this.$t('common.inprogress'))
                         return
                     }
-                    if(this.filepath.trim().length ==0 ){
-                        this.msg=this.$t('exportContainer.specifyFilepath')
-                            $('#alertMsg').css("display", "");
-                        return
-                    }
                     $('#alertMsg').css("display", "none");
                     $('#spinner').css("display", "");
                     this.running = true;
-                    ipcRenderer.send('async_exportContainer_save', this.id, this.filepath)
+                    console.log(this.name);
+                    ipcRenderer.send('async_createNetwork_create', this.name)
                 },
             }
         })
 
         // メインプロセスからの通信受け取り
-        ipcRenderer.on('async_exportContainer_set', function (event, x_id, x_tag, x_locale) {
-            console.log(x_id + ":" + x_tag);
-            app.doInit(x_id, x_tag, x_locale)
+        ipcRenderer.on('async_createNetwork_set', function (event, x_locale) {
+            app.doInit(x_locale)
         })
-        
+
         // メインプロセスからの通信受け取り
-        ipcRenderer.on('async_exportContainer_save_res', function (event, x_errMsg) {
+        ipcRenderer.on('async_createNetwork_create_res', function (event, x_errMsg) {
             app.msg = x_errMsg;
             $('#alertMsg').css("display", "");
-
             $('#spinner').css("display", "none");
             app.running = false;
         })
