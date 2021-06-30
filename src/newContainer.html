@@ -31,51 +31,73 @@
 
 <body>
     <div class="container">
-        <div class="row bs-callout bs-callout-info">
-            <h4 id="dealing-with-specificity">新しいコンテナを作成します</h4>
-        </div>
         <div id="app">
+            <div class="row bs-callout bs-callout-info">
+            <h4 id="dealing-with-specificity">{{$t("newContainer.title")}}</h4>
+        </div>
             <form>
             <div class="form-group row">
-                <label for="image_tag" class="col-sm-4 col-form-label">イメージTag</label>
+                <label for="image_tag" class="col-sm-4 col-form-label">{{$t("newContainer.imageTag")}}</label>
                 <div class="col-sm-8">
                     <input type="text" readonly class="form-control-plaintext" 
                         id="image_tag"  v-model="image_tag"/>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="image_id" class="col-sm-4 col-form-label">イメージID</label>
+                <label for="image_id" class="col-sm-4 col-form-label">{{$t("newContainer.imageId")}}</label>
                 <div class="col-sm-8">
                     <input type="text" readonly class="form-control-plaintext" 
                         id="image_id"  v-model="image_id"/>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="image_id" class="col-sm-4 col-form-label">サービス自動起動</label>
+                <label for="image_id" class="col-sm-4 col-form-label">{{$t("newContainer.service")}}</label>
                 <div class="col-sm-8">
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio"
                             id="privileged_true" v-model="privileged" value="true">
-                        <label class="form-check-label" for="privileged_true">する</label>
+                        <label class="form-check-label" for="privileged_true">{{$t("newContainer.service.yes")}}</label>
                     </div>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio"
                             id="privileged_false" v-model="privileged" value="false">
-                        <label class="form-check-label" for="privileged_false">しない</label>
+                        <label class="form-check-label" for="privileged_false">{{$t("newContainer.service.no")}}</label>
                     </div>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="hostname" class="col-sm-4 col-form-label">ホスト名</label>
+                <label for="cmd" class="col-sm-4 col-form-label">{{$t("newContainer.command")}}</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" 
+                        id="cmd"  v-model="cmd"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="hostname" class="col-sm-4 col-form-label">{{$t("newContainer.hostname")}}</label>
                 <div class="col-sm-8">
                     <input type="text" class="form-control" 
                         id="hostname"  v-model="hostname"/>
                 </div>
             </div>
             <div class="form-group row">
+                <label for="containername" class="col-sm-4 col-form-label">{{$t("newContainer.containername")}}</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" 
+                        id="containername"  v-model="containername"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="network" class="col-sm-4 col-form-label">{{$t("newContainer.network")}}</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" 
+                        id="network"  v-model="network"/>
+                </div>
+            </div>
+
+            <div class="form-group row">
                 <!-- 転送 1つめ -->
                 <span class="col-sm-4">
-                    <label for="port01type" class="col-form-label">ポート転送</label>
+                    <label for="port01type" class="col-form-label">{{$t("newContainer.portForwarding")}}</label>
                     <i class="far fa-question-circle text-info" data-toggle="tooltip" data-placement="top" title="HOST --&gt; Container"></i>
                 </span>
                 <div class="col-sm-3">
@@ -154,6 +176,75 @@
             </div>
 
             <div class="form-group row">
+                <!-- Environment variable 1 -->
+                <span class="col-sm-4">
+                    <label for="envvar01name" class="col-form-label">{{$t("newContainer.envvar")}}</label>
+                </span>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" 
+                        id="envvar01name"  v-model="envvar01name"/>
+                </div>
+                <label col-sm-1->=</label>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" 
+                        id="envvar01value"  v-model="envvar01value"/>
+                </div>
+                <!-- Environment variable 2 -->
+                <span class="col-sm-4">
+                    <label for="envvar01name" class="col-form-label"></label>
+                </span>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" 
+                        id="envvar02name"  v-model="envvar02name"/>
+                </div>
+                <label col-sm-1->=</label>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" 
+                        id="envvar02value"  v-model="envvar02value"/>
+                </div>
+                <!-- Environment variable 3 -->
+                <span class="col-sm-4">
+                    <label for="envvar01name" class="col-form-label"></label>
+                </span>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" 
+                        id="envvar03name"  v-model="envvar03name"/>
+                </div>
+                <label col-sm-1->=</label>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" 
+                        id="envvar03value"  v-model="envvar03value"/>
+                </div>            
+                 <!-- Environment variable 4 -->
+                 <span class="col-sm-4">
+                    <label for="envvar01name" class="col-form-label"></label>
+                </span>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" 
+                        id="envvar04name"  v-model="envvar04name"/>
+                </div>
+                <label col-sm-1->=</label>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" 
+                        id="envvar04value"  v-model="envvar04value"/>
+                </div>                
+                 <!-- Environment variable 5 -->
+                 <span class="col-sm-4">
+                    <label for="envvar01name" class="col-form-label"></label>
+                </span>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" 
+                        id="envvar05name"  v-model="envvar05name"/>
+                </div>
+                <label col-sm-1->=</label>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" 
+                        id="envvar05value"  v-model="envvar05value"/>
+                </div>
+            </div>
+
+
+            <div class="form-group row">
                 <label for="hostname" class="col-sm-4 col-form-label">メモ</label>
                 <div class="col-sm-8">
                     <textarea rows="5" cols="60" class="form-control" id="memo" v-model="memo"></textarea>
@@ -166,10 +257,12 @@
                 <div class="col-sm-auto">
                     <button type="button" class="btn btn-success" @click="doSubmit()">
                     <span id="spinner" class="spinner-border spinner-border-sm" role="status" style="display:none"></span>作成</button>
-                    <button type="button" class="btn btn-light" @click="window.close()">キャンセル</button>
+                    <button type="button" class="btn btn-light" @click="window.close()">{{$t("common.cancel")}}</button>
                 </div>
                 <div class="col-sm-2"></div>
             </div>
+
+            
 
         </form>
         </div>
@@ -179,28 +272,53 @@
         const { ipcRenderer } = require('electron');
         const dockerAPI = require('./dockerAPI');
         const sqlite = require('./libsrc/sqlite.js');
+        const vuei18n = require('vue-i18n');
+        Vue.use(vuei18n);
+        const i18n = new vuei18n({
+            locale : 'ja',
+            messages : {
+                ja : require('./messages_ja.json'),
+                en : require('./messages_en.json')
+            }
+        })
+
         var app = new Vue({
+            i18n:i18n,
             el: '#app',
             data: {
                 image_tag: "",
                 image_id: "",
                 privileged: "true",
+                cmd : '/sbin/init',
                 hostname: "rakwf21",
+                containername:"",
                 port01type: "tcp",   port01from: "8080",   port01to: "8080",
                 port02type: "tcp",   port02from: "22",     port02to: "22",
                 port03type: "--",   port03from: "",       port03to: "",
                 port04type: "--",   port04from: "",       port04to: "",
+                envvar01name : "", envvar01value : "",
+                envvar02name : "", envvar02value : "",
+                envvar03name : "", envvar03value : "",
+                envvar04name : "", envvar04value : "",
+                envvar05name : "", envvar05value : "",
+                envvar06name : "", envvar06value : "",
+                envvar07name : "", envvar07value : "",
+                envvar08name : "", envvar08value : "",
+                envvar09name : "", envvar09value : "",
+                envvar10name : "", envvar10value : "",
                 memo: "",
+                network:"",
                 running : false,
             },
             methods: {
-                doInit: function (x_imageid, x_tag) {
+                doInit: function (x_imageid, x_tag, x_locale) {
                     this.image_id = x_imageid;
                     this.image_tag = x_tag;
+                    i18n.locale = x_locale;
                 },
                 doSubmit: function () {
                     if(this.running){
-                        alert('処理中です')
+                        alert(this.$t('common.inprogress'))
                     }
                 	var privileged = ("true" == this.privileged);
                 	
@@ -213,7 +331,7 @@
 
                 	var postData = {
                 			    "Hostname": this.hostname,
-                			    "Cmd": ["/sbin/init"],
+                			    "Cmd": [this.cmd],
                 			    "Image" : this.image_tag,
                 			    "ExposedPorts":{
                                     //"8080/tcp":{},
@@ -224,10 +342,28 @@
                 			      "PortBindings":{
                 			        //"8080/tcp":[ {"HostPort":"8080"} ],
                 			        //"22/tcp":[ {"HostPort":"22"} ],
-                			      }
+                			      },
                 			    }
                 			  };
-                	  
+                    if (this.network) {
+                        postData.HostConfig['NetworkMode'] = this.network;
+                    }
+                    var envarArray = [
+                        [this.envvar01name, this.envvar01value],
+                        [this.envvar02name, this.envvar02value],
+                        [this.envvar03name, this.envvar03value],
+                        [this.envvar04name, this.envvar04value],
+                        [this.envvar05name, this.envvar05value],                       
+                    ];
+                    var envvarSetting = [];
+                    for (i=0; i < envarArray.length; i++) {
+                        if (envarArray[i][0] && envarArray[i][1]) {
+                            envvarSetting.push(envarArray[i][0] + "=" + envarArray[i][1]);
+                        }
+                    }
+                    if (envvarSetting.length != 0) {
+                        postData['Env'] = envvarSetting;
+                    }
                 	var portsArray = [
                 	    [this.port01type, this.port01from, this.port01to],
                 	    [this.port02type, this.port02from, this.port02to],
@@ -273,15 +409,15 @@
                             })
                         }
                     }
-                    dockerAPI.createContainer(postData, true, thisCallback);
+                    dockerAPI.createContainer(postData, true, thisCallback, this.containername);
                 }
             }
         })
 
         // メインプロセスからの通信受け取り
-        ipcRenderer.on('async_newContainer_set', function (event, x_imageid, x_tag) {
+        ipcRenderer.on('async_newContainer_set', function (event, x_imageid, x_tag, x_locale) {
             console.log(x_imageid + ":" + x_tag);
-            app.doInit(x_imageid, x_tag)
+            app.doInit(x_imageid, x_tag, x_locale)
         })
 
     </script>
