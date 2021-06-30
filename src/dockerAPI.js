@@ -65,7 +65,7 @@ exports.getContainers = getContainers = function (x_callback) {
  * @param x_start true(コンテナを開始する) false(作成のみ)
  * @param x_callback(x_id, x_err) 生成したイメージのID, x_err失敗時エラー内容
  */
-exports.createContainer = createContainer = function (x_postData, x_start, x_callback) {
+exports.createContainer = createContainer = function (x_postData, x_start, x_callback, x_containerName) {
   /*
 let postData = {
   "Hostname": "rakwf21",
@@ -88,7 +88,11 @@ let postData = {
   //  console.log( postDataStr );
 
   var containerID = null;
-  options = getOptions("/containers/create", "POST", 'application/json', postDataStr)
+  var url = "/containers/create";
+  if (x_containerName) {
+    url = url + "?name=" + x_containerName;
+  }
+  options = getOptions(url, "POST", 'application/json', postDataStr)
   http = require('http');
   let req = http.request(options, (res) => {
     res.setEncoding('utf8');
