@@ -65,6 +65,8 @@
     "newContainer.hostname":"ホスト名",
     "newContainer.portForwarding":"ポート転送",
     "newContainer.envvar":"環境変数",
+    "newContainer.network":"所属ネットワーク",
+    "newContainer.containername":"コンテナ名",
 
     "networkTab.name" : "ネットワーク名",
     "networkTab.containers":"接続されているコンテナ",
