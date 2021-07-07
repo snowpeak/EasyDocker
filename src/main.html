@@ -39,18 +39,18 @@
             <ul class="nav nav-tabs">
                 <li class="nav-item">
                     <a id="vavContainer" href="#containerTab" class="nav-link active"
-                        data-toggle="tab">{{$t("maintabs.containerAdministration")}}</a>
+                        data-bs-toggle="tab">{{$t("maintabs.containerAdministration")}}</a>
                 </li>
                 <li class="nav-item">
                     <a id="navImage" href="#imageTab" class="nav-link"
-                        data-toggle="tab">{{$t("maintabs.imageAdministration")}}</a>
+                        data-bs-toggle="tab">{{$t("maintabs.imageAdministration")}}</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#settingTab" class="nav-link" data-toggle="tab">{{$t("maintabs.dockerConfig")}}</a>
+                    <a href="#settingTab" class="nav-link" data-bs-toggle="tab">{{$t("maintabs.dockerConfig")}}</a>
                 </li>
                 <li class="nav-item">
                     <a id="navNetwork" href="#networkTab" class="nav-link"
-                        data-toggle="tab">{{$t("maintabs.networkAdministration")}}</a>
+                        data-bs-toggle="tab">{{$t("maintabs.networkAdministration")}}</a>
                 </li>
             </ul>
         </div>
@@ -60,9 +60,9 @@
                 <h1>{{$t("containertab.header")}}</h1>
                 <div v-if="!init">{{$t("containertab.init")}}</div>
                 <div v-if="init && containers.length == 0">{{$t("containertab.nocontainer")}}</div>
-                <table v-if="containers.length > 0" border="1">
-                    <tbody>
-                        <tr>
+                <table v-if="containers.length > 0" class="table table-striped">
+                    <thead>
+                        <tr class="table-primary">
                             <th>{{$t("containertab.name")}}</th>
                             <th>{{$t("containertab.label")}}</th>
                             <th>{{$t("containertab.status")}}</th>
@@ -72,6 +72,9 @@
                             <th>{{$t("containertab.delete")}}</th>
                             <!-- >th>ID</th -->
                         </tr>
+                    </thead>
+                    <tbody>
+                        
                         <tr v-for="container in containers">
                             <td>{{container.name}}</td>
                             <td>{{container.image}}</td>
@@ -85,7 +88,7 @@
                                         @click="stopContainer($event, container.id)">
                                         <span class="spinner-border spinner-border-sm" role="status"
                                             style="display:none"></span>
-                                        停止
+                                            {{$t("common.stop")}}
                                     </button>
                                 </span>
                             </td>
@@ -102,11 +105,11 @@
                             <td>
                                 <pre style="margin-bottom:0" v-html="container.memo"></pre>
                                 <BR><a　style="color:blue;text-decoration:underline;font-style:oblique;cursor:pointer"
-                                    @click="editContainerMemo(container.id)">{{$t("common.edit.en")}}</a>
+                                    @click="editContainerMemo(container.id)">{{$t("common.edit")}}</a>
                             </td>
                             <td>
-                                <button type="button" class="btn btn-danger" data-toggle="modal"
-                                    data-target="#deleteConfirm"
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                                    data-bs-target="#deleteConfirm"
                                     @click="setModalValue(container.image, container.state, container.id)">{{$t("common.delete")}}</button>
                         </tr>
                         <!--  td>{{container.id}}</td -->
@@ -122,21 +125,24 @@
                 <h1>{{$t("imagetab.imagelist")}}</h1>
                 <div v-if="!init">{{$t("imagetab.initprogress")}}</div>
                 <div v-if="init && images.length == 0">{{$t("imagetab.noimage")}}</div>
-                <table v-if="images.length > 0" border="1">
-                    <tbody>
-                        <tr>
+                <table v-if="images.length > 0" class="table table-striped">
+                    <thead>
+                        <tr class="table-primary">
                             <th>{{$t("imagetab.tag")}}</th>
                             <th>{{$t("imagetab.operation")}}</th>
                             <th>{{$t("imagetab.size")}}</th>
                             <th>{{$t("imagetab.id")}}</th>
                         </tr>
+                    </thead>
+                    <tbody>
+                        
                         <tr v-for="image in images">
                             <td>{{image.tag}}</td>
                             <td>
                                 <button class="btn btn-primary"
                                     @click="vueImageTab.newContainer(image.id, image.tag)">{{$t("common.start")}}</button>
-                                <button type="button" class="btn btn-danger" data-toggle="modal"
-                                    data-target="#deleteImageConfirm"
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                                    data-bs-target="#deleteImageConfirm"
                                     @click="vueImageTab.deleteImage(image.id, image.tag)">{{$t("common.delete")}}</button>
                             </td>
                             <td>{{image.size}}</td>
@@ -154,9 +160,9 @@
                 <div class="container-fluid p-3">
                     <div class="row">
                         <div class="col-7">
-                            <table v-if="networkDetail.length > 0" class="table table-bordered" width="70%">
+                            <table v-if="networkDetail.length > 0" class="table table-striped" width="70%">
                                 <thead>
-                                    <tr>
+                                    <tr class="table-primary">
                                         <th>{{$t("networkTab.name")}}</th>
                                         <th>{{$t("networkTab.containers")}}</th>
                                     </tr>
@@ -206,8 +212,7 @@
                     <h5 class="modal-title">{{$t("deleteconform.confirmation")}}</h5>
 
                     <!--  右上の×ボタン -->
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
                     </button>
                 </div>
 
@@ -238,7 +243,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary"
-                        data-dismiss="modal">{{$t("common.cancel")}}</button>
+                        data-bs-dismiss="modal">{{$t("common.cancel")}}</button>
                     <button type="button" class="btn btn-danger" @click="doDelete()">
                         <span id="spinner" class="spinner-border spinner-border-sm" role="status"
                             style="display:none"></span>
@@ -256,13 +261,12 @@
                     <h5 id="deleteImageConfirmText" class="modal-title"></h5>
 
                     <!--  右上の×ボタン -->
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
                     </button>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary"
-                        data-dismiss="modal">{{$t("common.cancel")}}</button>
+                        data-bs-dismiss="modal">{{$t("common.cancel")}}</button>
                     <button type="button" class="btn btn-danger" @click="doDelete()">{{$t("common.delete")}}</button>
                 </div>
             </div>
@@ -366,7 +370,7 @@
                     ipcRenderer.send('async_main_exportContainer', x_id, x_tag, i18n.locale);
                 },
                 editContainerMemo: function (x_id) {
-                    ipcRenderer.send('async_main_editContainerMemo', x_id);
+                    ipcRenderer.send('async_main_editContainerMemo', x_id, i18n.locale);
                 },
                 setModalValue: function (x_image, x_state, x_id) {
                     deleteConfirm.setValue(x_image, x_state, x_id)
