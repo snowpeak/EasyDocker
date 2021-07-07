@@ -6,10 +6,12 @@
     "common.stop":"停止",
     "common.connect":"接続",
     "common.delete":"削除",
+    "common.edit":"編集",
     "common.edit.en":"edit",
     "common.start":"起動",
     "common.inprogress":"処理中です",
     "common.exec":"実行",
+    "common.display":"表示",
 
     "maintabs.containerAdministration":"コンテナ管理",
     "maintabs.imageAdministration":"イメージ管理",
@@ -67,6 +69,7 @@
     "newContainer.envvar":"環境変数",
     "newContainer.network":"所属ネットワーク",
     "newContainer.containername":"コンテナ名",
+    "newContainer.memo":"メモ",
 
     "networkTab.name" : "ネットワーク名",
     "networkTab.containers":"接続されているコンテナ",

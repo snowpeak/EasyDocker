@@ -6,10 +6,12 @@
     "common.stop":"Stop",
     "common.connect":"Connect",
     "common.delete":"Delete",
+    "common.edit":"edit",
     "common.edit.en":"edit",
     "common.start":"Start",
     "common.inprogress":"In progress.",
     "common.exec":"Execute",
+    "common.display":"Display",
 
     "maintabs.containerAdministration":"Containers",
     "maintabs.imageAdministration":"Images",
@@ -67,6 +69,7 @@
     "newContainer.envvar":"Environment variable",
     "newContainer.network":"Network",
     "newContainer.containername":"Container Name",
+    "newContainer.memo":"Memo",
 
     "networkTab.name" : "Network name",
     "networkTab.containers":"Connected containers",
