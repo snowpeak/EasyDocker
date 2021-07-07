@@ -16,7 +16,7 @@ window.onload = function(){
 }
 function initPage() {
 
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
         var activatedTab = e.target.toString() // HtmlAnchorElement.toString()( full URL+#tabname )
         var idx = activatedTab.lastIndexOf('#');
         if(idx>0){
