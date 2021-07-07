@@ -4,6 +4,7 @@
     @author Latte Beo
 -->
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -23,7 +24,7 @@
     </script>
     <!-- https://cdn.jsdelivr.net/npm/vue -->
     <script src="./js/vue.js"></script>
-    
+
     <script>if (window.module) module = window.module;</script>
 
     <title>Easy Docker - Create Network</title>
@@ -33,34 +34,32 @@
     <div class="container">
         <div id="app">
             <div class="row bs-callout bs-callout-info">
-            <h4 id="dealing-with-specificity">{{$t("createNetwork.title")}}</h4>
-        </div>
+                <h4 id="dealing-with-specificity">{{$t("createNetwork.title")}}</h4>
+            </div>
             <form>
                 <div class="form-group row">
-                    <label for="name"
-                        class="col-sm-4 col-form-label">{{$t("createNetwork.name")}}</label>
+                    <label for="name" class="col-sm-4 col-form-label">{{$t("createNetwork.name")}}</label>
                     <div class="col-sm-6">
-                        <input type="text" class="form-control"
-                            id="name" v-model="name" />
+                        <input type="text" class="form-control" id="name" v-model="name" />
                     </div>
                 </div>
+                <br>
                 <!-- button -->
                 <div class="form-group row">
-                    <div class="col-sm-3"></div>
+                    <div class="col-sm-4"></div>
                     <div class="col-sm-auto">
-                        <button type="button" class="btn btn-success"  @click="doSubmit()">
-                          <span id="spinner" class="spinner-border spinner-border-sm" role="status" style="display:none"></span>
-                          <span>{{$t("common.create")}}</span>
-                         </button>
+                        <button type="button" class="btn btn-success" @click="doSubmit()">
+                            <span id="spinner" class="spinner-border spinner-border-sm" role="status"
+                                style="display:none"></span>
+                            <span>{{$t("common.create")}}</span>
+                        </button>
                         <button type="button" class="btn btn-light"
                             @click="window.close()">{{$t("common.cancel")}}</button>
                     </div>
-                    <div class="col-sm-2"></div>
                 </div>
             </form>
         </div>
     </div>
-    
 
     <script>
         const dockerAPI = require('./dockerAPI');
@@ -68,31 +67,30 @@
         const vuei18n = require('vue-i18n');
         Vue.use(vuei18n);
         const i18n = new vuei18n({
-            locale : 'ja',
-            messages : {
-                ja : require('./messages_ja.json'),
-                en : require('./messages_en.json')
+            locale: 'ja',
+            messages: {
+                ja: require('./messages_ja.json'),
+                en: require('./messages_en.json')
             }
         })
         var app = new Vue({
-            i18n : i18n, 
+            i18n: i18n,
             el: '#app',
             data: {
                 name: "",
             },
             methods: {
-                doInit : function(x_locale){
+                doInit: function (x_locale) {
                     i18n.locale = x_locale;
                 },
                 doSubmit: function () {
-                    if(this.running){
+                    if (this.running) {
                         alert(this.$t('common.inprogress'))
                         return
                     }
                     $('#alertMsg').css("display", "none");
                     $('#spinner').css("display", "");
                     this.running = true;
-                    console.log(this.name);
                     ipcRenderer.send('async_createNetwork_create', this.name)
                 },
             }
@@ -110,7 +108,6 @@
             $('#spinner').css("display", "none");
             app.running = false;
         })
-
     </script>
 
     <!-- ================================= -->
@@ -125,18 +122,17 @@
     </script>
     <!-- https://code.jquery.com/jquery-3.3.1.slim.min.js -->
     <script src="./js/jquery-3.3.1.slim.min.js"></script>
-    
+
     <!-- https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js -->
     <script src="./js/popper.min.js"></script>
     <!-- https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js -->
     <script src="./js/bootstrap.min.js"></script>
     <script>
         $(function () {
-          $('[data-toggle="tooltip"]').tooltip()
+            $('[data-toggle="tooltip"]').tooltip()
         })
     </script>
-
     <script>if (window.module) module = window.module;</script>
-    </body>
+</body>
 
 </html>
