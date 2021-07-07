@@ -19,10 +19,10 @@
             module = undefined;
         }
     </script>
-  
+
     <!-- https://cdn.jsdelivr.net/npm/vue -->
     <script src="./js/vue.js"></script>
-    
+
     <script>if (window.module) module = window.module;</script>
 
     <title>Easy Docker - editMemo</title>
@@ -30,7 +30,7 @@
 
 <body>
     <div class="container">
-            <div id="app">
+        <div id="app">
             <div class="row bs-callout bs-callout-info">
                 <h4 id="dealing-with-specificity">{{$t("editContainerMemo.title")}}</h4>
             </div>
@@ -46,44 +46,44 @@
                         <textarea rows="10" cols="60" class="form-control" id="memo" v-model="memo"></textarea>
                     </div>
                 </div>
-                 
+                <br>
+
                 <!-- button -->
                 <div class="form-group row">
-                    <div class="col-sm-3"></div>
                     <div class="col-sm-auto">
-                        <button type="button" class="btn btn-success"  @click="doSubmit()">
-                          <span id="spinner" class="spinner-border spinner-border-sm" role="status" style="display:none"></span>
-                          <span>{{$t("common.save")}}</span>
-                         </button>
+                        <button type="button" class="btn btn-success" @click="doSubmit()">
+                            <span id="spinner" class="spinner-border spinner-border-sm" role="status"
+                                style="display:none"></span>
+                            <span>{{$t("common.save")}}</span>
+                        </button>
                         <button type="button" class="btn btn-light"
                             @click="window.close()">{{$t("common.cancel")}}</button>
                     </div>
-                    <div class="col-sm-2"></div>
                 </div>
                 <div class="form-group row">
-                    <div class="alert alert-danger col-sm-12"
-                        role="alert" data-dismiss="alert" id="alertMsg" style="display:none">
+                    <div class="alert alert-danger col-sm-12" role="alert" data-dismiss="alert" id="alertMsg"
+                        style="display:none">
                         <input type="text" class="form-control-plaintext" v-model="msg" />
-                        </div>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
-    
+
 
     <script>
         const { ipcRenderer } = require('electron');
         const vuei18n = require('vue-i18n');
         Vue.use(vuei18n);
         const i18n = new vuei18n({
-            locale : 'ja',
-            messages : {
-                ja : require('./messages_ja.json'),
-                en : require('./messages_en.json')
+            locale: 'ja',
+            messages: {
+                ja: require('./messages_ja.json'),
+                en: require('./messages_en.json')
             }
         })
         var app = new Vue({
-            i18n : i18n, 
+            i18n: i18n,
             el: '#app',
             data: {
                 id: "",
@@ -112,7 +112,7 @@
             console.log(x_id + ":" + x_memo);
             app.doInit(x_id, x_memo, x_locale)
         })
-        
+
         // メインプロセスからの通信受け取り
         ipcRenderer.on('async_editContainerMemo_save_res', function (event, x_errMsg) {
             app.msg = x_errMsg;
@@ -135,18 +135,18 @@
     </script>
     <!-- https://code.jquery.com/jquery-3.3.1.slim.min.js -->
     <script src="./js/jquery-3.3.1.slim.min.js"></script>
-    
+
     <!-- https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js -->
     <script src="./js/popper.min.js"></script>
     <!-- https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js -->
     <script src="./js/bootstrap.min.js"></script>
     <script>
         $(function () {
-          $('[data-toggle="tooltip"]').tooltip()
+            $('[data-toggle="tooltip"]').tooltip()
         })
     </script>
 
     <script>if (window.module) module = window.module;</script>
-    </body>
+</body>
 
 </html>
