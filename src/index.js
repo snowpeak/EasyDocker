@@ -2,6 +2,7 @@ const s_debug = false
 
 const {app, Menu, BrowserWindow} = require('electron');
 const sql = require('./libsrc/sqlite.js');
+require('@electron/remote/main').initialize();
 
 let s_mainWin;
 let s_exportContainerWin;
@@ -27,7 +28,9 @@ function createWindow (x_path, x_width, x_height, x_debug) {
   let thisWin = new BrowserWindow({
         width: x_width, 
         height: x_height,
-        webPreferences: { nodeIntegration: true}
+        webPreferences: { nodeIntegration: true,
+        contextIsolation:false,
+        enableRemoteModule: true}
     });
     
   // ウィンドウ最大化
@@ -202,7 +205,7 @@ ipcMain.on('async_createNetwork_create', function(x_event, x_name){
  */
 ipcMain.on('async_main_newContainer', function(x_event, x_imageid, x_tag, x_locale){
   var path = `file://${__dirname}/newContainer.html`
-  s_newContainerWin = createWindow(path, 750, 800, s_debug);
+  s_newContainerWin = createWindow(path, 850, 950, s_debug);
 
   s_newContainerWin.webContents.on('did-finish-load', ()=>{
     // setter
