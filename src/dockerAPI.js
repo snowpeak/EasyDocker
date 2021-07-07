@@ -31,7 +31,7 @@ exports.getContainers = getContainers = function (x_callback) {
 
       containers.forEach(function (container) {
         //console.log(container)
-        var name = container['Names'][0];
+        var name = container['Names'][0].substring(1);
         var id = container['Id'];
         var image = container['Image']
         var state = container['State']
